@@ -5,6 +5,8 @@ import { useSidebar } from '@/hooks/use-sidebar';
 import { cn } from '@/lib/utils';
 import { ChevronsLeft } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '../ui/button';
+import LogoutButton from '@/pages/auth/logout/components/LogoutButton';
 
 type SidebarProps = {
   className?: string;
@@ -43,11 +45,12 @@ export default function Sidebar({ className }: SidebarProps) {
           onClick={handleToggle}
         />
       </div>
-      <div className="space-y-4 py-4">
-        <div className="px-2 py-2">
-          <div className="mt-3 space-y-1">
+      <div className=" py-4">
+        <div className="flex h-[90vh] flex-col justify-between px-2 pb-5 pt-2">
+          <div className="mt-3 space-y-1 ">
             <DashboardNav items={navItems} />
           </div>
+          <LogoutButton isMinimized={isMinimized} />
         </div>
       </div>
     </nav>

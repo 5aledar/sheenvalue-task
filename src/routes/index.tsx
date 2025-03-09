@@ -1,3 +1,4 @@
+import ChangePasswordPage from '@/pages/auth/change-password';
 import FormPage from '@/pages/form';
 import NotFound from '@/pages/not-found';
 import { Suspense, lazy } from 'react';
@@ -12,8 +13,6 @@ const StudentPage = lazy(() => import('@/pages/students'));
 const StudentDetailPage = lazy(
   () => import('@/pages/students/StudentDetailPage')
 );
-
-// ----------------------------------------------------------------------
 
 export default function AppRouter() {
   const dashboardRoutes = [
@@ -42,6 +41,11 @@ export default function AppRouter() {
         {
           path: 'form',
           element: <FormPage />
+        },
+        {
+          path: '/change-password',
+          element: <ChangePasswordPage />,
+          index: true
         }
       ]
     }
@@ -53,6 +57,7 @@ export default function AppRouter() {
       element: <SignInPage />,
       index: true
     },
+
     {
       path: '/404',
       element: <NotFound />

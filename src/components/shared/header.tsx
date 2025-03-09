@@ -19,9 +19,9 @@ export default function Header() {
   const headingText = useMatchedPath(pathname);
 
   return (
-    <div className="flex flex-1 items-center justify-between bg-secondary px-4">
+    <div className="flex w-full flex-1 items-center justify-between bg-secondary px-4">
       <Heading title={headingText} />
-      <div className="ml-4 flex items-center md:ml-6">
+      <div className=" flex  items-center md:ml-6">
         <UserNav />
         <ModeToggle />
       </div>

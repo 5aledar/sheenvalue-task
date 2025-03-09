@@ -12,13 +12,13 @@ export const navItems: NavItem[] = [
     href: '/student',
     icon: 'user',
     label: 'Student'
-  },
-  {
-    title: 'Login',
-    href: '/login',
-    icon: 'login',
-    label: 'Login'
   }
+  // {
+  //   title: 'Logout',
+  //   href: '/logout',
+  //   icon: 'login',
+  //   label: 'Logout'
+  // }
 ];
 
 export const users = [

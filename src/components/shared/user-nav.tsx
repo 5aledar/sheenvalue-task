@@ -10,20 +10,24 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { useLogout } from '@/pages/auth/hooks/useLogout';
+import LogoutButton from '@/pages/auth/logout/components/LogoutButton';
+import { useRouter } from '@/routes/hooks';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserNav() {
+  const navigate = useNavigate();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-14 w-14 rounded-full">
-          <Avatar className="h-14 w-14">
+          <Avatar className=" h-8 w-8">
             <AvatarImage
-              src={
-                'https://png.pngtree.com/png-clipart/20230927/original/pngtree-man-avatar-image-for-profile-png-image_13001882.png'
-              }
-              alt={''}
+              src={'https://avatar.iran.liara.run/public/boy?username=mohanad'}
+              alt={'admin'}
             />
-            <AvatarFallback>hello</AvatarFallback>
+            <AvatarFallback>loading...</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -38,24 +42,17 @@ export default function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => navigate('/change-password')}
+            className="cursor-pointer hover:bg-secondary"
+          >
+            Change password
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Billing
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => console.log('logout')}>
-          Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+        <DropdownMenuItem className="py-2">
+          <LogoutButton />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
