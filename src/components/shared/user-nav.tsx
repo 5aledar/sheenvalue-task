@@ -7,13 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useLogout } from '@/pages/auth/hooks/useLogout';
 import LogoutButton from '@/pages/auth/logout/components/LogoutButton';
-import { useRouter } from '@/routes/hooks';
-import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 export default function UserNav() {

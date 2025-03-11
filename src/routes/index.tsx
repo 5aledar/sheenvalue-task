@@ -10,7 +10,7 @@ const DashboardLayout = lazy(
 );
 const SignInPage = lazy(() => import('@/pages/auth/signin'));
 const DashboardPage = lazy(() => import('@/pages/dashboard'));
-const StudentPage = lazy(() => import('@/pages/students'));
+// const StudentPage = lazy(() => import('@/pages/students'));
 const StudentDetailPage = lazy(
   () => import('@/pages/students/StudentDetailPage')
 );

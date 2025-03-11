@@ -5,7 +5,6 @@ import { useSidebar } from '@/hooks/use-sidebar';
 import { cn } from '@/lib/utils';
 import { ChevronsLeft } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '../ui/button';
 import LogoutButton from '@/pages/auth/logout/components/LogoutButton';
 
 type SidebarProps = {

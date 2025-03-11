@@ -32,10 +32,8 @@ const formSchema = z
     path: ['confirmPassword']
   });
 
-type UserFormValue = z.infer<typeof formSchema>;
-
 export default function PasswordForm() {
-  const { mutate: changePassword, isPending, error } = useChangePassowrd();
+  const { mutate: changePassword, isPending } = useChangePassowrd();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

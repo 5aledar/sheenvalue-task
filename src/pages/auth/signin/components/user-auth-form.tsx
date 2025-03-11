@@ -11,7 +11,6 @@ import { useLogin } from '../../hooks/useLogin';
 import { Input } from '@/components/ui/input';
 import { useRouter } from '@/routes/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import toast from 'react-hot-toast';
@@ -27,7 +26,6 @@ type UserFormValue = z.infer<typeof formSchema>;
 
 export default function UserAuthForm() {
   const router = useRouter();
-  const [loading] = useState(false);
   const defaultValues = {
     email: '',
     passwrod: ''

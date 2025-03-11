@@ -13,7 +13,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useCreateCountry } from '../../hooks/useCreateCountry';
 import toast from 'react-hot-toast';
-import { useRouter } from '@/routes/hooks';
 
 const countryFormSchema = z.object({
   name: z
@@ -30,7 +29,6 @@ const CountryCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     resolver: zodResolver(countryFormSchema),
     defaultValues: {}
   });
-  const router = useRouter();
   const { mutate: createCountry, isPending } = useCreateCountry();
   const onSubmit = async (data: countryFormValue) => {
     console.log(data);
