@@ -15,17 +15,22 @@ import { useChangePassowrd } from '../../hooks/useChangePassword';
 import toast from 'react-hot-toast';
 import { useRouter } from '@/routes/hooks';
 
-const formSchema = z.object({
-  old_password: z.string().min(8, {
-    message: 'Password must be at least 8 characters long'
-  }),
-  new_password: z.string().min(8, {
-    message: 'Password must be at least 8 characters long'
-  }),
-  new_password_confirmation: z.string().min(8, {
-    message: 'Password must be at least 8 characters long'
+const formSchema = z
+  .object({
+    old_password: z.string().min(8, {
+      message: 'Password must be at least 8 characters long'
+    }),
+    new_password: z.string().min(8, {
+      message: 'Password must be at least 8 characters long'
+    }),
+    new_password_confirmation: z.string().min(8, {
+      message: 'Password must be at least 8 characters long'
+    })
   })
-});
+  .refine((data) => data.new_password === data.new_password_confirmation, {
+    message: 'Passwords must match',
+    path: ['confirmPassword']
+  });
 
 type UserFormValue = z.infer<typeof formSchema>;
 

@@ -10,9 +10,10 @@ import {
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from '@/routes/hooks';
 import { useState } from 'react';
+import { Country } from '../../lib/types';
 
 interface CellActionProps {
-  data;
+  data: Country;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {

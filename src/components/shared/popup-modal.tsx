@@ -22,9 +22,7 @@ export default function PopupModal({ renderModal }: TPopupModalProps) {
         onClose={onClose}
         className={'!bg-background !px-1'}
       >
-        <ScrollArea className="h-[80dvh] px-6  ">
-          {renderModal(onClose)}
-        </ScrollArea>
+        <ScrollArea className="h-fit px-6  ">{renderModal(onClose)}</ScrollArea>
       </Modal>
     </>
   );

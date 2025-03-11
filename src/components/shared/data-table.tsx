@@ -35,7 +35,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageSizeOptions?: number[];
-  pageCount: number;
+  pageCount?: number;
 }
 
 export default function DataTable<TData, TValue>({
@@ -43,7 +43,7 @@ export default function DataTable<TData, TValue>({
   data,
   pageCount,
   pageSizeOptions = [10, 20, 30, 40, 50]
-}: DataTableProps<TData, TValue>) {
+}: Readonly<DataTableProps<TData, TValue>>) {
   const [searchParams, setSearchParams] = useSearchParams();
   // Search params
   const page = searchParams?.get('page') ?? '1';

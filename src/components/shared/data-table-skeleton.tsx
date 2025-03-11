@@ -18,55 +18,47 @@ type DataTableSkeletonProps = {
 
 export function DataTableSkeleton({
   columnCount,
-  rowCount = 10,
-  searchableColumnCount = 0,
-  filterableColumnCount = 0,
-  showViewOptions = true
+  rowCount = 15
 }: DataTableSkeletonProps) {
   return (
-    <div className="w-full space-y-3 overflow-auto">
-      <div className="flex w-full items-center justify-between space-x-2 overflow-auto p-1">
-        <div className="flex flex-1 items-center space-x-2 space-y-4">
-          {searchableColumnCount > 0
-            ? Array.from({ length: searchableColumnCount }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-[150px] lg:w-[250px]" />
-              ))
-            : null}
-          {filterableColumnCount > 0
-            ? Array.from({ length: filterableColumnCount }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-[70px] border-dashed" />
-              ))
-            : null}
+    <div className="flex h-[50rem] w-full flex-col justify-between space-y-3 overflow-auto">
+      <div>
+        <div className="flex w-full items-center justify-between  overflow-auto ">
+          <div className="flex  w-full  items-center justify-between pb-3">
+            <Skeleton className="h-7 w-[150px] lg:w-[250px]" />
+
+            <div className="flex">
+              <Skeleton className="h-7 w-[70px] border-dashed" />
+            </div>
+          </div>
         </div>
-        {showViewOptions ? (
-          <Skeleton className="ml-auto hidden h-7 w-[70px] lg:flex" />
-        ) : null}
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {Array.from({ length: 1 }).map((_, i) => (
-              <TableRow key={i} className="hover:bg-transparent">
-                {Array.from({ length: columnCount }).map((_, i) => (
-                  <TableHead key={i}>
-                    <Skeleton className="h-6 w-full" />
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: rowCount }).map((_, i) => (
-              <TableRow key={i} className="hover:bg-transparent">
-                {Array.from({ length: columnCount }).map((_, i) => (
-                  <TableCell key={i}>
-                    <Skeleton className="h-6 w-full" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {Array.from({ length: 1 }).map((_, i) => (
+                <TableRow key={i} className="hover:bg-transparent">
+                  {Array.from({ length: columnCount }).map((_, i) => (
+                    <TableHead key={i}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableHead>
+                  ))}
+                  <Skeleton className="h-6 " />
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: rowCount }).map((_, i) => (
+                <TableRow key={i} className="hover:bg-transparent">
+                  {Array.from({ length: columnCount }).map((_, i) => (
+                    <TableCell key={i}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       <div className="flex w-full flex-col items-center justify-between gap-4 overflow-auto px-2 py-1 sm:flex-row sm:gap-8">
         <div className="flex-1">

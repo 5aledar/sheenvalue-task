@@ -1,4 +1,5 @@
 import ChangePasswordPage from '@/pages/auth/change-password';
+import CountryPage from '@/pages/countries';
 import FormPage from '@/pages/form';
 import NotFound from '@/pages/not-found';
 import { Suspense, lazy } from 'react';
@@ -31,8 +32,8 @@ export default function AppRouter() {
           index: true
         },
         {
-          path: 'student',
-          element: <StudentPage />
+          path: 'countries',
+          element: <CountryPage />
         },
         {
           path: 'student/details',
