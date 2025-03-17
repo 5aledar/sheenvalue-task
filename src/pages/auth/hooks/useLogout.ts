@@ -26,7 +26,7 @@ export const logout = async (data: any) => {
 
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.put(
+        const retryResponse = await client.post(
           '/admin/auth/logout',
           {},
           {
