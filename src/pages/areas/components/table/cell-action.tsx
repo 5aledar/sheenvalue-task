@@ -8,48 +8,46 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Trash } from 'lucide-react';
+import { useRouter } from '@/routes/hooks';
 import { useState } from 'react';
-import { Country } from '../../lib/types';
+import { Area, City } from '../../lib/types';
 import PopupModal from '@/components/shared/popup-modal';
-import CountryForm from '../forms/country-form';
-import { useDeleteCountry } from '../../hooks/useDeleteCountry';
+import CountryCreateForm from '@/pages/countries/components/forms/country-form';
+import CityForm from '../forms/city-form';
+import { useDeleteArea } from '../../hooks/useDeleteArea';
 import toast from 'react-hot-toast';
 
-interface CountryCellActionProps {
-  data: Country;
-  country: Country;
+interface CellActionProps {
+  data: Area;
+  area: Area;
 }
 
-export const CellAction: React.FC<CountryCellActionProps> = ({
-  data,
-  country
-}) => {
+export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
-  const { mutate: deleteCountry, isPending } = useDeleteCountry();
+
+  const { mutate: deleteCity, isPending } = useDeleteArea();
 
   const onConfirm = async () => {
-    deleteCountry(data.id, {
+    deleteCity(data.id, {
       onSuccess: () => {
-        toast.success('Country deleted successfully');
+        toast.success('city deleted successfully');
         setOpen(false);
       },
       onError: (error) => {
-        toast.error('Something went wrong');
-        console.error(error);
+        toast.error('something went wrong');
+        console.log(error);
       }
     });
   };
 
   return (
     <>
-      {/* Delete Confirmation Modal */}
       <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
         onConfirm={onConfirm}
         loading={isPending}
       />
-
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -62,10 +60,10 @@ export const CellAction: React.FC<CountryCellActionProps> = ({
 
           <div className="flex flex-col gap-2">
             <PopupModal
-              title="Update"
+              title="update"
               icon="Edit"
               renderModal={(onClose) => (
-                <CountryForm modalClose={onClose} country={data} />
+                <CityForm modalClose={onClose} area={data} />
               )}
             />
             <Button

@@ -10,8 +10,20 @@ export const navItems: NavItem[] = [
   {
     title: 'Countries',
     href: '/countries',
-    icon: 'user',
+    icon: 'country',
     label: 'Country'
+  },
+  {
+    title: 'Cities',
+    href: '/cities',
+    icon: 'city',
+    label: 'City'
+  },
+  {
+    title: 'Areas',
+    href: '/areas',
+    icon: 'area',
+    label: 'Area'
   }
 ];
 

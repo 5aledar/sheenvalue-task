@@ -2,16 +2,18 @@ import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 
-export const fetchCountries = async (page?: number) => {
+export const fetchAreas = async (page: number) => {
   const token = localStorage.getItem('token');
 
   try {
-    const response = await client.get(`/admin/countries?page=${page || 1}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response = await client.get(
+      `/admin/areas?page=${page}&include=city`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
-    console.log(response.data);
+    );
 
     return response.data;
   } catch (error: any) {
@@ -23,7 +25,7 @@ export const fetchCountries = async (page?: number) => {
 
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.get('/admin/countries', {
+        const retryResponse = await client.get('/admin/areas?include=city', {
           headers: {
             Authorization: `Bearer ${newToken}`
           }
@@ -38,14 +40,14 @@ export const fetchCountries = async (page?: number) => {
     }
   }
 };
-export function useFetchCountries(page: number) {
+export function useFetchAreas(page: number) {
   const { data, isLoading } = useQuery({
-    queryKey: ['countries', page],
-    queryFn: () => fetchCountries(page)
+    queryKey: ['areas', page],
+    queryFn: () => fetchAreas(page)
   });
 
   return {
-    countries: data?.data?.items,
+    areas: data?.data?.items,
     pagination: data?.data?.pagination,
     isLoading
   };

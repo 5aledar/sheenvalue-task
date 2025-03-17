@@ -2,16 +2,18 @@ import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 
-export const fetchCountries = async (page?: number) => {
+export const fetchCities = async (page: number) => {
   const token = localStorage.getItem('token');
 
   try {
-    const response = await client.get(`/admin/countries?page=${page || 1}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response = await client.get(
+      `/admin/cities?page=${page}&include=country`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
-    console.log(response.data);
+    );
 
     return response.data;
   } catch (error: any) {
@@ -23,11 +25,14 @@ export const fetchCountries = async (page?: number) => {
 
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.get('/admin/countries', {
-          headers: {
-            Authorization: `Bearer ${newToken}`
+        const retryResponse = await client.get(
+          '/admin/cities?include=country',
+          {
+            headers: {
+              Authorization: `Bearer ${newToken}`
+            }
           }
-        });
+        );
         return retryResponse.data;
       } else {
         console.log('Redirecting to login...');
@@ -38,14 +43,14 @@ export const fetchCountries = async (page?: number) => {
     }
   }
 };
-export function useFetchCountries(page: number) {
+export function useFetchCities(page: number) {
   const { data, isLoading } = useQuery({
-    queryKey: ['countries', page],
-    queryFn: () => fetchCountries(page)
+    queryKey: ['cities', page],
+    queryFn: () => fetchCities(page)
   });
 
   return {
-    countries: data?.data?.items,
+    cities: data?.data?.items,
     pagination: data?.data?.pagination,
     isLoading
   };

@@ -8,79 +8,88 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useCreateCountry } from '../../hooks/useCreateCountry';
-import { useUpdateCountry } from '../../hooks/useUpdateCountry';
+import { useCreateCity } from '../../hooks/useCreateCity';
+import { useUpdateCity } from '../../hooks/useUpdateCity'; // Hook for updating city
+import { useFetchCountries } from '@/pages/countries/hooks/useFetchCountries';
 import toast from 'react-hot-toast';
-import { Country } from '../../lib/types';
+import { Country, City } from '../../lib/types';
 
-const countryFormSchema = z.object({
+const cityFormSchema = z.object({
   name_en: z
-    .string({ required_error: 'English name is required' })
-    .min(1, { message: 'Country name should be at least 1 character' }),
+    .string({ required_error: 'City name is required' })
+    .min(1, { message: 'City name should be at least 1 character' }),
   name_ar: z
-    .string({ required_error: 'Arabic name is required' })
-    .min(1, { message: 'Country name should be at least 1 character' }),
+    .string({ required_error: 'City name is required' })
+    .min(1, { message: 'City name should be at least 1 character' }),
   name_tr: z
-    .string({ required_error: 'Turkish name is required' })
-    .min(1, { message: 'Country name should be at least 1 character' }),
-  currency: z.string().min(2, { message: 'Currency is required' }),
-  code: z.string().min(1, { message: 'Code is required' })
+    .string({ required_error: 'City name is required' })
+    .min(1, { message: 'City name should be at least 1 character' }),
+  country_id: z.string().min(1, { message: 'Country is required' })
 });
 
-type CountryFormValue = z.infer<typeof countryFormSchema>;
+type CityFormValues = z.infer<typeof cityFormSchema>;
 
-type CountryFormProps = {
+interface CityFormProps {
   modalClose: () => void;
-  country?: Country;
-};
+  city?: City;
+}
 
-const CountryForm = ({ modalClose, country }: CountryFormProps) => {
-  const isEditing = Boolean(country);
-  const form = useForm<CountryFormValue>({
-    resolver: zodResolver(countryFormSchema),
-    defaultValues: country || {
-      name_en: '',
-      name_ar: '',
-      name_tr: '',
-      currency: '',
-      code: ''
-    }
+const CityForm = ({ modalClose, city }: CityFormProps) => {
+  const form = useForm<CityFormValues>({
+    resolver: zodResolver(cityFormSchema),
+    defaultValues: city
+      ? {
+          name_en: city.name_en,
+          name_ar: city.name_ar,
+          name_tr: city.name_tr,
+          country_id: String(city.country_id)
+        }
+      : { name_en: '', name_ar: '', name_tr: '', country_id: '' }
   });
 
-  const { mutate: createCountry, isPending: isCreating } = useCreateCountry();
-  const { mutate: updateCountry, isPending: isUpdating } = useUpdateCountry();
+  const { mutate: createCity, isPending: isCreating } = useCreateCity();
+  const { mutate: updateCity, isPending: isUpdating } = useUpdateCity();
+  const { countries, isLoading } = useFetchCountries(1);
 
-  const onSubmit = async (data: CountryFormValue) => {
-    if (isEditing && country) {
-      updateCountry(
+  const onSubmit = async (data: CityFormValues) => {
+    if (city) {
+      // If city exists, update it
+      updateCity(
         {
-          id: country.id,
+          id: city.id,
           data: {
             name_en: data.name_en,
             name_ar: data.name_ar,
             name_tr: data.name_tr,
-            currency: data.currency,
-            code: data.code
+            country_id: data.country_id
           }
         },
         {
           onSuccess: () => {
-            toast.success('Country updated successfully');
+            toast.success('City updated successfully');
             modalClose();
           },
-          onError: (error: any) => console.error(error)
+          onError: (error: any) => console.log(error)
         }
       );
     } else {
-      createCountry(data, {
+      // Otherwise, create a new city
+      createCity(data, {
         onSuccess: () => {
-          toast.success('New country added successfully');
+          toast.success('New city added successfully');
           modalClose();
         },
-        onError: (error: any) => console.error(error)
+        onError: (error: any) => console.log(error)
       });
     }
   };
@@ -88,8 +97,8 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
   return (
     <div className="p-5">
       <Heading
-        title={isEditing ? 'Update Country' : 'Create New Country'}
-        description={''}
+        title={city ? 'Update City' : 'Create New City'}
+        description=""
         className="space-y-2 py-4 text-center"
       />
       <Form {...form}>
@@ -98,6 +107,7 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
           className="space-y-4"
           autoComplete="off"
         >
+          {/* City Name Field */}
           <FormField
             control={form.control}
             name="name_en"
@@ -105,7 +115,7 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="name in english"
+                    placeholder="Name in English"
                     {...field}
                     className="px-4 py-6 shadow-inner drop-shadow-xl"
                     disabled={isCreating || isUpdating}
@@ -122,7 +132,7 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="name in arabic"
+                    placeholder="Name in Arabic"
                     {...field}
                     className="px-4 py-6 shadow-inner drop-shadow-xl"
                     disabled={isCreating || isUpdating}
@@ -139,41 +149,7 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="name in turkish"
-                    {...field}
-                    className="px-4 py-6 shadow-inner drop-shadow-xl"
-                    disabled={isCreating || isUpdating}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="currency"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="USD"
-                    {...field}
-                    className="px-4 py-6 shadow-inner drop-shadow-xl"
-                    disabled={isCreating || isUpdating}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="code"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="Z100"
+                    placeholder="Name in Turkey"
                     {...field}
                     className="px-4 py-6 shadow-inner drop-shadow-xl"
                     disabled={isCreating || isUpdating}
@@ -184,6 +160,41 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
             )}
           />
 
+          {/* Country Select Field */}
+          <FormField
+            control={form.control}
+            name="country_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  {!isLoading && (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isCreating || isUpdating}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries?.map((country: Country) => (
+                          <SelectItem
+                            key={country.id}
+                            value={String(country.id)}
+                          >
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Buttons */}
           <div className="flex items-center justify-center gap-4">
             <Button
               type="button"
@@ -196,12 +207,12 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
               Cancel
             </Button>
             <Button
-              disabled={isCreating || isUpdating}
               type="submit"
               className="rounded-full"
               size="lg"
+              disabled={isCreating || isUpdating}
             >
-              {isEditing ? 'Update Country' : 'Create Country'}
+              {city ? 'Update City' : 'Create City'}
             </Button>
           </div>
         </form>
@@ -210,4 +221,4 @@ const CountryForm = ({ modalClose, country }: CountryFormProps) => {
   );
 };
 
-export default CountryForm;
+export default CityForm;

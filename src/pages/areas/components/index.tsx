@@ -1,21 +1,21 @@
 import DataTable from '@/components/shared/data-table';
 
-import CountryTableActions from './table/country-table-action';
-import { Country } from '../lib/types';
+import CountryTableActions from './table/area-table-action';
+import { Area, City } from '../lib/types';
 import { columns } from './table/columns';
-import { useFetchCountries } from '../hooks/useFetchCountries';
-import { DataTableSkeleton } from '@/components/shared/data-table-skeleton';
 import { useEffect, useState } from 'react';
+import { useFetchAreas } from '../hooks/useFetchAreas';
+import { DataTableSkeleton } from '@/components/shared/data-table-skeleton';
+import CityTableActions from './table/area-table-action';
 
-export default function CountriesTable() {
+export default function AreaTable() {
   const [page, setPage] = useState(1);
   const {
-    countries,
+    areas,
     pagination,
     isLoading
-  }: { countries: Country[]; pagination: any; isLoading: boolean } =
-    useFetchCountries(page);
-
+  }: { areas: Area[]; pagination: any; isLoading: boolean } =
+    useFetchAreas(page);
   useEffect(() => {
     if (!isLoading) {
       setPage(pagination?.page);
@@ -24,11 +24,11 @@ export default function CountriesTable() {
 
   const pageLimit = pagination?.per_page;
   const totalCountries = pagination?.total;
-  const pageCount = Math.ceil(totalCountries / pageLimit);
+  const pageCount = Math.ceil(totalCountries! / pageLimit);
 
   return (
     <>
-      <CountryTableActions />
+      <CityTableActions />
       {isLoading ? (
         <div className="p-5">
           <DataTableSkeleton columnCount={3} />
@@ -36,7 +36,7 @@ export default function CountriesTable() {
       ) : (
         <DataTable
           columns={columns}
-          data={countries}
+          data={areas}
           pageCount={pageCount}
           onPageChange={setPage}
         />

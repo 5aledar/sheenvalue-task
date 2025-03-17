@@ -43,11 +43,7 @@ export default function SignInPage() {
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
-            <p className="text-lg">
-              &ldquo;This library has saved me countless hours of work and
-              helped me deliver stunning designs to my clients faster than ever
-              before.&rdquo;
-            </p>
+            <p className="text-lg">&ldquo;This is login page&rdquo;</p>
             <footer className="text-sm">Sofia Davis</footer>
           </blockquote>
         </div>
@@ -55,11 +51,9 @@ export default function SignInPage() {
       <div className="flex h-full items-center p-4 lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Create an account
-            </h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Login</h1>
             <p className="text-sm text-muted-foreground">
-              Enter your email below to create your account
+              Enter your email below to log into your account
             </p>
           </div>
           <UserAuthForm />

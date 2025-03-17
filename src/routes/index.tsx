@@ -1,4 +1,6 @@
+import AreaPage from '@/pages/areas';
 import ChangePasswordPage from '@/pages/auth/change-password';
+import CityPage from '@/pages/cities';
 import CountryPage from '@/pages/countries';
 import FormPage from '@/pages/form';
 import NotFound from '@/pages/not-found';
@@ -36,12 +38,12 @@ export default function AppRouter() {
           element: <CountryPage />
         },
         {
-          path: 'student/details',
-          element: <StudentDetailPage />
+          path: 'cities',
+          element: <CityPage />
         },
         {
-          path: 'form',
-          element: <FormPage />
+          path: 'areas',
+          element: <AreaPage />
         },
         {
           path: '/change-password',

@@ -9,7 +9,7 @@ interface LogoutProps {
 }
 const LogoutButton = ({ isMinimized }: LogoutProps) => {
   const router = useRouter();
-  const { mutate: logout } = useLogout();
+  const { mutate: logout, isPending } = useLogout();
 
   const handleLogout = () => {
     logout(undefined, {
@@ -28,6 +28,7 @@ const LogoutButton = ({ isMinimized }: LogoutProps) => {
     <Button
       onClick={handleLogout}
       className="flex w-full justify-start gap-1 p-3 "
+      disabled={isPending}
     >
       <LogOutIcon className="w-4" />
       {!isMinimized && 'Logout'}

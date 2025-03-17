@@ -1,6 +1,7 @@
 import DashboardNav from '@/components/shared/dashboard-nav';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { navItems } from '@/constants/data';
+import LogoutButton from '@/pages/auth/logout/components/LogoutButton';
 import { Dispatch, SetStateAction } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -22,8 +23,9 @@ export default function MobileSidebar({
               <Link to="/" className="px-2 py-2 text-2xl font-bold text-white ">
                 Logo
               </Link>
-              <div className="space-y-1 px-2">
+              <div className="flex h-[825px] flex-col justify-between space-y-1 px-2">
                 <DashboardNav items={navItems} setOpen={setSidebarOpen} />
+                <LogoutButton />
               </div>
             </div>
           </div>

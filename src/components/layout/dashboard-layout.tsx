@@ -6,9 +6,9 @@ import { MenuIcon } from 'lucide-react';
 
 export default function DashboardLayout({
   children
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   return (

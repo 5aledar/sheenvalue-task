@@ -1,9 +1,9 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
-import { Country } from '../../lib/types';
+import { Area } from '../../lib/types';
 
-export const columns: ColumnDef<Country>[] = [
+export const columns: ColumnDef<Area>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -24,19 +24,20 @@ export const columns: ColumnDef<Country>[] = [
     enableHiding: false
   },
   {
+    accessorKey: 'id',
+    header: 'ID'
+  },
+  {
     accessorKey: 'name',
     header: 'Name'
   },
   {
-    accessorKey: 'currency',
-    header: 'Currency'
-  },
-  {
-    accessorKey: 'code',
-    header: 'Code'
+    accessorKey: 'city',
+    header: 'City Name',
+    cell: ({ row }) => row.original.city?.name_en || 'N/A'
   },
   {
     id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} country={row.original} />
+    cell: ({ row }) => <CellAction data={row.original} area={row.original} />
   }
 ];

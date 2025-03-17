@@ -1,20 +1,3 @@
-// import { useMutation } from '@tanstack/react-query';
-// import axios from 'axios';
-
-// const logout = async () => {
-//   const token = localStorage.getItem('token');
-//   const response = await axios.post(
-//     'https://dispatcher.mouhannadabdalrhem.online/api/v1/admin/auth/logout',
-//     {},
-//     {
-//       headers: {
-//         Authorization: `Bearer ${token}`
-//       }
-//     }
-//   );
-
-//   return response.data;
-// };
 import { useMutation } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
