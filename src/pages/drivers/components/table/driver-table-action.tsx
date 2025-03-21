@@ -1,6 +1,6 @@
 import PopupModal from '@/components/shared/popup-modal';
 import TableSearchInput from '@/components/shared/table-search-input';
-import CountryCreateForm from '../forms/area-form';
+import CountryCreateForm from '../forms/driver-form';
 
 export default function AreaTableActions() {
   return (

@@ -26,15 +26,15 @@ import { useFetchCities } from '@/pages/cities/hooks/useFetchCities';
 
 const areaFormSchema = z.object({
   name_en: z
-    .string({ required_error: 'City name is required' })
-    .min(1, { message: 'City name should be at least 1 character' }),
+    .string({ required_error: 'Area name is required' })
+    .min(1, { message: 'Area name should be at least 1 character' }),
   name_ar: z
-    .string({ required_error: 'City name is required' })
-    .min(1, { message: 'City name should be at least 1 character' }),
+    .string({ required_error: 'Area name is required' })
+    .min(1, { message: 'Area name should be at least 1 character' }),
   name_tr: z
-    .string({ required_error: 'City name is required' })
-    .min(1, { message: 'City name should be at least 1 character' }),
-  city_id: z.string().min(1, { message: 'Country is required' })
+    .string({ required_error: 'Area name is required' })
+    .min(1, { message: 'Area name should be at least 1 character' }),
+  city_id: z.string().min(1, { message: 'City is required' })
 });
 
 type CityFormValues = z.infer<typeof areaFormSchema>;
@@ -67,25 +67,24 @@ const CityForm = ({ modalClose, area }: CityFormProps) => {
         {
           id: area?.id,
           data: {
-            name_en: area.name_en,
-            name_ar: area?.name_ar,
-            name_tr: area?.name_tr,
+            name_en: data.name_en,
+            name_ar: data?.name_ar,
+            name_tr: data?.name_tr,
             country_id: data.city_id
           }
         },
         {
           onSuccess: () => {
-            toast.success('City updated successfully');
+            toast.success('Area updated successfully');
             modalClose();
           },
           onError: (error: any) => console.log(error)
         }
       );
     } else {
-      // Otherwise, create a new city
       createArea(data, {
         onSuccess: () => {
-          toast.success('New city added successfully');
+          toast.success('New Area added successfully');
           modalClose();
         },
         onError: (error: any) => console.log(error)
@@ -96,7 +95,7 @@ const CityForm = ({ modalClose, area }: CityFormProps) => {
   return (
     <div className="p-5">
       <Heading
-        title={area ? 'Update City' : 'Create New City'}
+        title={area ? 'Update Area' : 'Create New Area'}
         description=""
         className="space-y-2 py-4 text-center"
       />
@@ -106,7 +105,6 @@ const CityForm = ({ modalClose, area }: CityFormProps) => {
           className="space-y-4"
           autoComplete="off"
         >
-          {/* City Name Field */}
           <FormField
             control={form.control}
             name="name_en"

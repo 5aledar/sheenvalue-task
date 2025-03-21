@@ -3,34 +3,31 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Trash } from 'lucide-react';
-import { useRouter } from '@/routes/hooks';
 import { useState } from 'react';
-import { Area, City } from '../../lib/types';
+import { Driver } from '../../lib/types';
 import PopupModal from '@/components/shared/popup-modal';
-import CountryCreateForm from '@/pages/countries/components/forms/country-form';
-import CityForm from '../forms/area-form';
-import { useDeleteArea } from '../../hooks/useDeleteArea';
+import DriverForm from '../forms/driver-form';
+import { useDeleteDriver } from '../../hooks/useDeleteDriver';
 import toast from 'react-hot-toast';
 
 interface CellActionProps {
-  data: Area;
-  area: Area;
+  data: Driver;
+  driver: Driver;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
 
-  const { mutate: deleteCity, isPending } = useDeleteArea();
+  const { mutate: deleteDriver, isPending } = useDeleteDriver();
 
   const onConfirm = async () => {
-    deleteCity(data.id, {
+    deleteDriver(data.id, {
       onSuccess: () => {
-        toast.success('city deleted successfully');
+        toast.success('driver deleted successfully');
         setOpen(false);
       },
       onError: (error) => {
@@ -63,7 +60,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
               title="update"
               icon="Edit"
               renderModal={(onClose) => (
-                <CityForm modalClose={onClose} area={data} />
+                <DriverForm modalClose={onClose} driver={data} />
               )}
             />
             <Button

@@ -2,12 +2,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 
-const updateArea = async ({ id, data }: { id: number; data: any }) => {
+const updateDriver = async ({ id, data }: { id: number; data: any }) => {
   const token = localStorage.getItem('token');
   console.log(data);
 
   try {
-    const response = await client.put(`/admin/areas/${id}`, data, {
+    // Update the URL to reflect the driver endpoint
+    const response = await client.put(`/admin/drivers/${id}`, data, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -18,7 +19,7 @@ const updateArea = async ({ id, data }: { id: number; data: any }) => {
       const newToken = await refreshAuth();
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.put(`/admin/areas/${id}`, data, {
+        const retryResponse = await client.put(`/admin/drivers/${id}`, data, {
           headers: {
             Authorization: `Bearer ${newToken}`
           }
@@ -39,13 +40,13 @@ const updateArea = async ({ id, data }: { id: number; data: any }) => {
   }
 };
 
-export function useUpdateArea() {
+export function useUpdateDriver() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateArea,
+    mutationFn: updateDriver,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['areas'] });
+      queryClient.invalidateQueries({ queryKey: ['drivers'] });
     }
   });
 }

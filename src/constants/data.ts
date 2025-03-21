@@ -24,6 +24,12 @@ export const navItems: NavItem[] = [
     href: '/areas',
     icon: 'area',
     label: 'Area'
+  },
+  {
+    title: 'Drivers',
+    href: '/drivers',
+    icon: 'driver',
+    label: 'Driver'
   }
 ];
 

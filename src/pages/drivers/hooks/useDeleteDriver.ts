@@ -2,12 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 
-const updateArea = async ({ id, data }: { id: number; data: any }) => {
+const deleteDriver = async (id: number) => {
   const token = localStorage.getItem('token');
-  console.log(data);
 
   try {
-    const response = await client.put(`/admin/areas/${id}`, data, {
+    const response = await client.delete(`/admin/drivers/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -18,7 +17,7 @@ const updateArea = async ({ id, data }: { id: number; data: any }) => {
       const newToken = await refreshAuth();
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.put(`/admin/areas/${id}`, data, {
+        const retryResponse = await client.delete(`/admin/drivers/${id}`, {
           headers: {
             Authorization: `Bearer ${newToken}`
           }
@@ -28,24 +27,19 @@ const updateArea = async ({ id, data }: { id: number; data: any }) => {
         console.log('Redirecting to login...');
         redirect('/login');
       }
-    } else if (error.response?.status === 422) {
-      console.log('Validation Error:', error.response.data);
-      throw new Error(
-        'Validation failed: ' + JSON.stringify(error.response.data)
-      );
     } else {
       throw error;
     }
   }
 };
 
-export function useUpdateArea() {
+export function useDeleteDriver() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateArea,
+    mutationFn: deleteDriver,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['areas'] });
+      queryClient.invalidateQueries({ queryKey: ['drivers'] });
     }
   });
 }

@@ -2,7 +2,7 @@ import AreaPage from '@/pages/areas';
 import ChangePasswordPage from '@/pages/auth/change-password';
 import CityPage from '@/pages/cities';
 import CountryPage from '@/pages/countries';
-import FormPage from '@/pages/form';
+import DriverPage from '@/pages/drivers';
 import NotFound from '@/pages/not-found';
 import { Suspense, lazy } from 'react';
 import { Navigate, Outlet, useRoutes } from 'react-router-dom';
@@ -12,10 +12,6 @@ const DashboardLayout = lazy(
 );
 const SignInPage = lazy(() => import('@/pages/auth/signin'));
 const DashboardPage = lazy(() => import('@/pages/dashboard'));
-// const StudentPage = lazy(() => import('@/pages/students'));
-const StudentDetailPage = lazy(
-  () => import('@/pages/students/StudentDetailPage')
-);
 
 export default function AppRouter() {
   const dashboardRoutes = [
@@ -44,6 +40,10 @@ export default function AppRouter() {
         {
           path: 'areas',
           element: <AreaPage />
+        },
+        {
+          path: 'drivers',
+          element: <DriverPage />
         },
         {
           path: '/change-password',
