@@ -34,7 +34,7 @@ export interface Driver {
   area_id: number;
   first_name: string;
   last_name: string;
-  date_of_birth: string; // Consider using Date if needed
+  date_of_birth: Date;
   phone_number: string;
   email: string;
   nationality: string;
@@ -43,17 +43,19 @@ export interface Driver {
   plate_number: string;
   has_driving_license: number;
   has_worked_before: number;
-  notes: string | null;
-  profile_image: File | null; // If storing a file
-  vehicle_image: File | null; // If storing a file
+  notes: string;
+  profile_image: string | null;
+  vehicle_image: string | null;
   max_capacity: number;
   vehicle_max_distance: number;
   status: 'ACTIVE' | 'INACTIVE';
   is_available: number;
-  starting_work_at: string; // Use Date if needed
-  finishing_work_at: string; // Use Date if needed
+  starting_work_at: Date;
+  finishing_work_at: Date;
   is_application_locked: number;
   country: Country;
   city: City;
   area: Area;
+  password: string;
+  password_confirmation: string;
 }

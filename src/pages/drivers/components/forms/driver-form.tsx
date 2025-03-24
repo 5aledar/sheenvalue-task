@@ -15,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -22,8 +24,12 @@ import { useCreateDriver } from '../../hooks/useCreateDriver';
 import toast from 'react-hot-toast';
 import { City, Area, Driver } from '../../lib/types';
 import { useFetchCities } from '@/pages/cities/hooks/useFetchCities';
-import { Checkbox } from '@radix-ui/react-checkbox';
 import { useUpdateDriver } from '../../hooks/useUpdateDriver';
+import { Label } from '@/components/ui/label';
+import { useFetchCountries } from '@/pages/countries/hooks/useFetchCountries';
+import { useFetchAreas } from '@/pages/areas/hooks/useFetchAreas';
+import { useUploadImage } from '../../hooks/useUploadImage';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export const driverFormSchema = z
   .object({
@@ -36,34 +42,47 @@ export const driverFormSchema = z
     national_id: z.string().min(1, { message: 'National ID is required' }),
     vehicle_type: z.enum(['CAR', 'MOTORCYCLE', 'BICYCLE']),
     plate_number: z.string().optional(),
-    has_driving_license: z.number(),
-    has_worked_before: z.number(),
-    notes: z.string().nullable(),
-    profile_image: z.instanceof(File || String).nullable(),
-    vehicle_image: z.instanceof(File || String).nullable(),
+    has_driving_license: z.boolean(),
+    has_worked_before: z.boolean(),
+    notes: z.string().nullable().optional(),
+    profile_image: z.string().nullable().optional(),
+    vehicle_image: z.string().nullable().optional(),
     max_capacity: z.number().min(1, { message: 'Max capacity is required' }),
     vehicle_max_distance: z
       .number()
       .min(1, { message: 'Vehicle max distance is required' }),
     status: z.enum(['ACTIVE', 'INACTIVE']),
-    is_available: z.number(),
-    starting_work_at: z.string().min(1, { message: 'Start time is required' }), // Consider Date if needed
+    is_available: z.boolean(),
+    starting_work_at: z.string().min(1, { message: 'Start time is required' }),
     finishing_work_at: z
       .string()
-      .min(1, { message: 'Finish time is required' }), // Consider Date if needed
-    is_application_locked: z.number(),
+      .min(1, { message: 'Finish time is required' }),
+    is_application_locked: z.boolean(),
     country_id: z.number().min(1, { message: 'Country is required' }),
     city_id: z.number().min(1, { message: 'City is required' }),
-    area_id: z.number().min(1, { message: 'Area is required' })
+    area_id: z.number().min(1, { message: 'Area is required' }),
+    password: z.string().min(6, { message: 'Password is required' }).optional(),
+    password_confirmation: z
+      .string()
+      .min(6, { message: 'Password confirmation is required' })
+      .optional()
+  })
+  .refine((data) => data.vehicle_type !== 'CAR' || !!data.plate_number, {
+    message: 'Plate number is required for cars',
+    path: ['plate_number']
   })
   .refine((data) => data.vehicle_type !== 'BICYCLE' || !data.plate_number, {
     message: 'Bicycles do not require a plate number',
     path: ['plate_number']
   })
-  .refine((data) => data.vehicle_type !== 'CAR' || !!data.plate_number, {
-    message: 'Plate number is required for cars',
-    path: ['plate_number']
-  });
+  .refine(
+    (data) => !data.password || data.password === data.password_confirmation,
+    {
+      message: 'Passwords must match',
+      path: ['password_confirmation']
+    }
+  );
+
 type DriverFormValues = z.infer<typeof driverFormSchema>;
 
 interface CityFormProps {
@@ -72,34 +91,67 @@ interface CityFormProps {
 }
 
 const DriverForm = ({ modalClose, driver }: CityFormProps) => {
+  const [previewImages, setPreviewImages] = useState({
+    DRIVER_PROFILE: null,
+    DRIVER_VEHICLE: null
+  });
+
+  const { mutate: uploadImage, isPending: isUploading } = useUploadImage();
+
+  const handleImageChange = (
+    type: 'DRIVER_PROFILE' | 'DRIVER_VEHICLE',
+    file: File
+  ) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    const previewUrl = URL.createObjectURL(file);
+    setPreviewImages((prev) => ({ ...prev, [type]: previewUrl }));
+
+    uploadImage(formData, {
+      onSuccess: (data) => {
+        console.log(data.data.url);
+
+        if (type === 'DRIVER_PROFILE') {
+          form.setValue('profile_image', data.data.url);
+        } else {
+          form.setValue('vehicle_image', data.data.url);
+        }
+      },
+      onError: (error) => {
+        console.error(`Error uploading ${type} image:`, error);
+        setPreviewImages((prev) => ({ ...prev, [type]: null }));
+      }
+    });
+  };
+
+  const handleRemoveImage = (type: string) => {
+    // Revoke the object URL to avoid memory leaks
+    if (previewImages[type]) {
+      URL.revokeObjectURL(previewImages[type]);
+    }
+    setPreviewImages((prev) => ({ ...prev, [type]: null }));
+    if (type === 'DRIVER_PROFILE') {
+      form.setValue('profile_image', '');
+    } else {
+      form.setValue('vehicle_image', '');
+    }
+  };
+
   const form = useForm<DriverFormValues>({
     resolver: zodResolver(driverFormSchema),
     defaultValues: driver
       ? {
-          first_name: driver.first_name,
-          last_name: driver.last_name,
-          date_of_birth: driver.date_of_birth,
-          phone_number: driver.phone_number,
-          email: driver.email,
-          nationality: driver.nationality,
-          national_id: driver.national_id,
-          vehicle_type: driver.vehicle_type,
-          plate_number: driver.plate_number,
-          has_driving_license: driver.has_driving_license,
-          has_worked_before: driver.has_worked_before,
-          notes: driver.notes,
-          profile_image: driver.profile_image,
-          vehicle_image: driver.vehicle_image,
-          max_capacity: driver.max_capacity,
-          vehicle_max_distance: driver.vehicle_max_distance,
-          status: driver.status,
-          is_available: driver.is_available,
-          starting_work_at: driver.starting_work_at,
-          finishing_work_at: driver.finishing_work_at,
-          is_application_locked: driver.is_application_locked,
-          country_id: driver.country_id,
-          city_id: driver.city_id,
-          area_id: driver.area_id
+          ...driver,
+          has_driving_license: driver.has_driving_license === 1,
+          has_worked_before: driver.has_worked_before === 1,
+          is_available: driver.is_available === 1,
+          is_application_locked: driver.is_application_locked === 1,
+          profile_image: driver.profile_image ?? undefined,
+          vehicle_image: driver.vehicle_image ?? undefined,
+          password: undefined,
+          password_confirmation: undefined
         }
       : {
           first_name: '',
@@ -109,34 +161,43 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
           email: '',
           nationality: '',
           national_id: '',
-          vehicle_type: 'CAR', // Default to CAR if not provided
+          vehicle_type: 'CAR',
           plate_number: '',
-          has_driving_license: 0,
-          has_worked_before: 0,
-          notes: null,
-          profile_image: null,
-          vehicle_image: null,
-          max_capacity: 1, // Default to 1 if not provided
-          vehicle_max_distance: 1, // Default to 1 if not provided
+          has_driving_license: false,
+          has_worked_before: false,
+          notes: '',
+          profile_image: undefined,
+          vehicle_image: undefined,
+          max_capacity: 1,
+          vehicle_max_distance: 1,
           status: 'ACTIVE',
           is_available: true,
           starting_work_at: '',
           finishing_work_at: '',
-          is_application_locked: 0,
-          country_id: 0, // Adjust according to your default value
-          city_id: 0, // Adjust according to your default value
-          area_id: 0 // Adjust according to your default value
+          is_application_locked: false,
+          country_id: 0,
+          city_id: 0,
+          area_id: 0,
+          password: '',
+          password_confirmation: ''
         }
   });
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      console.log('Form values:', value);
+      console.log('Form errors:', form.formState.errors);
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   const { cities, isLoading } = useFetchCities(1);
+  const { countries } = useFetchCountries(1);
+  const { areas } = useFetchAreas(1);
   const { mutate: createDriver, isPending: isCreating } = useCreateDriver();
   const { mutate: updateDriver, isPending: isUpdating } = useUpdateDriver();
 
   const onSubmit = async (data: DriverFormValues) => {
-    // Create a new FormData instance to handle file uploads and other form fields
     const formData = new FormData();
-    // Append non-file fields to FormData
     formData.append('first_name', data.first_name);
     formData.append('last_name', data.last_name);
     formData.append('date_of_birth', data.date_of_birth);
@@ -146,36 +207,39 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
     formData.append('national_id', data.national_id);
     formData.append('vehicle_type', data.vehicle_type);
     formData.append('plate_number', String(data.plate_number));
-    formData.append('has_driving_license', String(data.has_driving_license));
-    formData.append('has_worked_before', String(data.has_worked_before));
     formData.append('notes', data.notes || '');
     formData.append('max_capacity', String(data.max_capacity));
     formData.append('vehicle_max_distance', String(data.vehicle_max_distance));
     formData.append('status', data.status);
-    formData.append('is_available', String(data.is_available));
     formData.append('starting_work_at', data.starting_work_at);
     formData.append('finishing_work_at', data.finishing_work_at);
-    formData.append(
-      'is_application_locked',
-      String(data.is_application_locked)
-    );
     formData.append('country_id', String(data.country_id));
     formData.append('city_id', String(data.city_id));
     formData.append('area_id', String(data.area_id));
 
-    // Append files (if any)
     if (data.profile_image) {
       formData.append('profile_image', data.profile_image);
     }
     if (data.vehicle_image) {
       formData.append('vehicle_image', data.vehicle_image);
     }
+    const booleanFields = [
+      'has_driving_license',
+      'has_worked_before',
+      'is_available',
+      'is_application_locked'
+    ];
 
-    // If updating an existing driver, include the driver ID
+    Object.entries(data).forEach(([key, value]) => {
+      if (booleanFields.includes(key)) {
+        formData.append(key, value ? '1' : '0');
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
     if (driver) {
-      formData.append('id', String(driver.id)); // Append the driver's ID for updating
-
-      // Call the update driver API
+      formData.append('id', String(driver.id)); //
       updateDriver(
         { id: driver.id, data: formData },
         {
@@ -190,7 +254,6 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
         }
       );
     } else {
-      // If creating a new driver
       createDriver(formData, {
         onSuccess: () => {
           toast.success('New Driver created successfully');
@@ -218,40 +281,42 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
           autoComplete="off"
         >
           {/* First Name */}
-          <FormField
-            control={form.control}
-            name="first_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="First Name"
-                    {...field}
-                    className="px-4 py-6 shadow-inner drop-shadow-xl"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="first_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="First Name"
+                      {...field}
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Last Name */}
-          <FormField
-            control={form.control}
-            name="last_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="Last Name"
-                    {...field}
-                    className="px-4 py-6 shadow-inner drop-shadow-xl"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Last Name */}
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Last Name"
+                      {...field}
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Date of Birth */}
           <FormField
@@ -261,6 +326,7 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
               <FormItem>
                 <FormControl>
                   <Input
+                    placeholder="Date of Birth"
                     type="date"
                     {...field}
                     className="px-4 py-6 shadow-inner drop-shadow-xl"
@@ -272,152 +338,251 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
           />
 
           {/* Phone Number */}
-          <FormField
-            control={form.control}
-            name="phone_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="Phone Number"
-                    {...field}
-                    className="px-4 py-6 shadow-inner drop-shadow-xl"
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Phone Number"
+                      {...field}
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Email"
+                      {...field}
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          {!driver && (
+            <div className="flex gap-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Password"
+                        {...field}
+                        className="px-4 py-6 shadow-inner drop-shadow-xl"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password_confirmation"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirm Password"
+                        {...field}
+                        className="px-4 py-6 shadow-inner drop-shadow-xl"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+          <div className="flex gap-4">
+            {/* Vehicle Type */}
+            <FormField
+              control={form.control}
+              name="vehicle_type"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="h-full">
+                        <SelectValue placeholder="Select Vehicle Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CAR">Car</SelectItem>
+                        <SelectItem value="MOTORCYCLE">Motorcycle</SelectItem>
+                        <SelectItem value="BICYCLE">Bicycle</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Plate Number */}
+            <FormField
+              control={form.control}
+              name="plate_number"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Plate Number"
+                      {...field}
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex gap-4">
+            {/* Has Driving License */}
+            <FormField
+              control={form.control}
+              name="has_driving_license"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <div className="flex gap-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="h-4 w-4"
+                        disabled={isCreating || isUpdating}
+                      />
+                      <Label>Has driving license</Label>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Has Worked Before */}
+            <FormField
+              control={form.control}
+              name="has_worked_before"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <div className="flex gap-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="h-4 w-4"
+                        disabled={isCreating || isUpdating}
+                      />
+                      <Label>Has Worked Before</Label>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex gap-4">
+            {/* Profile Image */}
+            <div className="w-full">
+              {previewImages.DRIVER_PROFILE ? (
+                <div className="relative">
+                  <img
+                    src={previewImages.DRIVER_PROFILE}
+                    alt="Profile preview"
+                    className="h-40 w-full rounded-md object-cover"
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage('DRIVER_PROFILE')}
+                    className="absolute right-2 top-2 rounded-full bg-white p-1 shadow-sm hover:bg-gray-100"
+                  >
+                    <X className="h-4 w-4 text-gray-600" />
+                  </button>
+                </div>
+              ) : (
+                <FormField
+                  name="profile_image"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleImageChange('DRIVER_PROFILE', file);
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
 
-          {/* Email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="Email"
-                    {...field}
-                    className="px-4 py-6 shadow-inner drop-shadow-xl"
+            {/* Vehicle Image */}
+            <div className="w-full">
+              {previewImages.DRIVER_VEHICLE ? (
+                <div className="relative">
+                  <img
+                    src={previewImages.DRIVER_VEHICLE}
+                    alt="Vehicle preview"
+                    className="h-40 w-full rounded-md object-cover"
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Vehicle Type */}
-          <FormField
-            control={form.control}
-            name="vehicle_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Vehicle Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CAR">Car</SelectItem>
-                      <SelectItem value="MOTORCYCLE">Motorcycle</SelectItem>
-                      <SelectItem value="BICYCLE">Bicycle</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Plate Number */}
-          <FormField
-            control={form.control}
-            name="plate_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="Plate Number"
-                    {...field}
-                    className="px-4 py-6 shadow-inner drop-shadow-xl"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Has Driving License */}
-          <FormField
-            control={form.control}
-            name="has_driving_license"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Checkbox
-                    {...field}
-                    checked={field.value === 1}
-                    onChange={() => field.onChange(!field.value)} // toggle the value
-                    disabled={isCreating || isUpdating}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Has Worked Before */}
-          <FormField
-            control={form.control}
-            name="has_worked_before"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    type="checkbox"
-                    checked={field.value === 1}
-                    onChange={(e) => field.onChange(e.target.checked ? 1 : 0)} // Store 1 for checked, 0 for unchecked
-                    disabled={isCreating || isUpdating}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Profile Image */}
-          <FormField
-            control={form.control}
-            name="profile_image"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    type="file"
-                    {...field}
-                    disabled={isCreating || isUpdating}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Vehicle Image */}
-          <FormField
-            control={form.control}
-            name="vehicle_image"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input type="file" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage('DRIVER_VEHICLE')}
+                    className="absolute right-2 top-2 rounded-full bg-white p-1 shadow-sm hover:bg-gray-100"
+                  >
+                    <X className="h-4 w-4 text-gray-600" />
+                  </button>
+                </div>
+              ) : (
+                <FormField
+                  name="vehicle_image"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleImageChange('DRIVER_VEHICLE', file);
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+          </div>
           {/* Status */}
           <FormField
             control={form.control}
@@ -445,35 +610,177 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
             control={form.control}
             name="is_available"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormControl>
-                  <Input
-                    type="checkbox"
-                    checked={field.value === 1}
-                    {...field}
-                  />
+                  <div className="flex gap-2">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="h-4 w-4"
+                      disabled={isCreating || isUpdating}
+                    />
+                    <Label>Has driving license</Label>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* City Select */}
           <FormField
             control={form.control}
-            name="city_id"
+            name="is_application_locked"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
+                <FormControl>
+                  <div className="flex gap-2">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="h-4 w-4"
+                      disabled={isCreating || isUpdating}
+                    />
+                    <Label>Application locked</Label>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex">
+            <FormField
+              control={form.control}
+              name="starting_work_at"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="time"
+                      {...field}
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="finishing_work_at"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type="time"
+                      {...field}
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex gap-4">
+            {/* City Select */}
+            <FormField
+              control={form.control}
+              name="country_id"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    {!isLoading && (
+                      <Select
+                        value={field.value?.toString()}
+                        onValueChange={(value) => field.onChange(Number(value))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Country">
+                            {field.value
+                              ? countries?.find((c) => c.id === field.value)
+                                  ?.name_en
+                              : 'Select Country'}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries?.map((country) => (
+                            <SelectItem
+                              key={country.id}
+                              value={country.id.toString()}
+                            >
+                              {' '}
+                              {/* Convert to string */}
+                              {country.name_en}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="city_id"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    {!isLoading && (
+                      <Select
+                        value={field.value?.toString()}
+                        onValueChange={(value) => field.onChange(Number(value))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select City">
+                            {field.value
+                              ? cities?.find((c) => c.id === field.value)
+                                  ?.name_en
+                              : 'Select City'}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {cities?.map((city) => (
+                            <SelectItem
+                              key={city.id}
+                              value={city.id.toString()}
+                            >
+                              {' '}
+                              {city.name_en}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="area_id"
+            render={({ field }) => (
+              <FormItem className="w-full">
                 <FormControl>
                   {!isLoading && (
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value?.toString()}
+                      onValueChange={(value) => field.onChange(Number(value))}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select City" />
+                        <SelectValue placeholder="Select Area">
+                          {field.value
+                            ? areas?.find((a) => a.id === field.value)?.name_en
+                            : 'Select Area'}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        {cities?.map((city) => (
-                          <SelectItem key={city.id} value={String(city.id)}>
-                            {city.name_en}
+                        {areas?.map((area) => (
+                          <SelectItem key={area.id} value={area.id.toString()}>
+                            {area.name_en}
                           </SelectItem>
                         ))}
                       </SelectContent>
