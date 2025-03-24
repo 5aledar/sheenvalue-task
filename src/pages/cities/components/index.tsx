@@ -1,6 +1,4 @@
 import DataTable from '@/components/shared/data-table';
-
-import CountryTableActions from './table/city-table-action';
 import { City } from '../lib/types';
 import { columns } from './table/columns';
 import { useEffect, useState } from 'react';

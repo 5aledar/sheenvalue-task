@@ -1,7 +1,6 @@
 import DataTable from '@/components/shared/data-table';
 
-import CountryTableActions from './table/area-table-action';
-import { Area, City } from '../lib/types';
+import { Area } from '../lib/types';
 import { columns } from './table/columns';
 import { useEffect, useState } from 'react';
 import { useFetchAreas } from '../hooks/useFetchAreas';

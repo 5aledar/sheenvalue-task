@@ -22,7 +22,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useCreateDriver } from '../../hooks/useCreateDriver';
 import toast from 'react-hot-toast';
-import { City, Area, Driver } from '../../lib/types';
+import { Driver } from '../../lib/types';
 import { useFetchCities } from '@/pages/cities/hooks/useFetchCities';
 import { useUpdateDriver } from '../../hooks/useUpdateDriver';
 import { Label } from '@/components/ui/label';
@@ -144,6 +144,13 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
     defaultValues: driver
       ? {
           ...driver,
+          date_of_birth: driver.date_of_birth.toISOString().split('T')[0], // Convert Date to YYYY-MM-DD
+          starting_work_at: driver.starting_work_at
+            .toTimeString()
+            .split(' ')[0],
+          finishing_work_at: driver.finishing_work_at
+            .toTimeString()
+            .split(' ')[0],
           has_driving_license: driver.has_driving_license === 1,
           has_worked_before: driver.has_worked_before === 1,
           is_available: driver.is_available === 1,
@@ -532,6 +539,7 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
                               e.target.value = '';
                             }
                           }}
+                          disabled={isUploading}
                         />
                       </FormControl>
                       <FormMessage />
@@ -574,6 +582,7 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
                               e.target.value = '';
                             }
                           }}
+                          disabled={isUploading}
                         />
                       </FormControl>
                       <FormMessage />
@@ -655,6 +664,7 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
                   <FormControl>
                     <Input
                       type="time"
+                      step="2"
                       {...field}
                       className="px-4 py-6 shadow-inner drop-shadow-xl"
                     />
@@ -672,6 +682,7 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
                   <FormControl>
                     <Input
                       type="time"
+                      step={'2'}
                       {...field}
                       className="px-4 py-6 shadow-inner drop-shadow-xl"
                     />

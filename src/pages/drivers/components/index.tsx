@@ -1,7 +1,6 @@
 import DataTable from '@/components/shared/data-table';
 
-import CountryTableActions from './table/driver-table-action';
-import { Area, City, Driver } from '../lib/types';
+import { Driver } from '../lib/types';
 import { columns } from './table/columns';
 import { useEffect, useState } from 'react';
 import { useFetchDrivers } from '../hooks/useFetchDrivers';

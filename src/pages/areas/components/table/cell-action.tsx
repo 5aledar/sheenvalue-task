@@ -3,16 +3,13 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Trash } from 'lucide-react';
-import { useRouter } from '@/routes/hooks';
 import { useState } from 'react';
-import { Area, City } from '../../lib/types';
+import { Area } from '../../lib/types';
 import PopupModal from '@/components/shared/popup-modal';
-import CountryCreateForm from '@/pages/countries/components/forms/country-form';
 import CityForm from '../forms/area-form';
 import { useDeleteArea } from '../../hooks/useDeleteArea';
 import toast from 'react-hot-toast';
