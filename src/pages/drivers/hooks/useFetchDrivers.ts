@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export const fetchDrivers = async (page: number) => {
   const token = localStorage.getItem('token');
@@ -17,25 +18,28 @@ export const fetchDrivers = async (page: number) => {
 
     return response.data;
   } catch (error: any) {
-    console.log('error', error);
-
     if (error.response?.status === 401) {
       const newToken = await refreshAuth();
       console.log('new token', newToken);
 
       if (newToken) {
-        setHeaderToken(newToken);
-        const retryResponse = await client.get(
-          '/admin/drivers?include=country,city,area',
-          {
-            headers: {
-              Authorization: `Bearer ${newToken}`
+        try {
+          setHeaderToken(newToken);
+          const retryResponse = await client.get(
+            '/admin/drivers?include=country,city,area',
+            {
+              headers: {
+                Authorization: `Bearer ${newToken}`
+              }
             }
-          }
-        );
-        return retryResponse.data;
+          );
+          return retryResponse.data;
+        } catch (error) {
+          console.log(error);
+        }
       } else {
-        console.log('Redirecting to login...');
+        localStorage.removeItem('token');
+        toast.error('something went wrong');
         redirect('/login');
       }
     } else {
@@ -45,7 +49,7 @@ export const fetchDrivers = async (page: number) => {
 };
 
 export function useFetchDrivers(page: number) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['drivers', page],
     queryFn: () => fetchDrivers(page)
   });
@@ -53,6 +57,7 @@ export function useFetchDrivers(page: number) {
   return {
     drivers: data?.data?.items,
     pagination: data?.data?.pagination,
+    error,
     isLoading
   };
 }

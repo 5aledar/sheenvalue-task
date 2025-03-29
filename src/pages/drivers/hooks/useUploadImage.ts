@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const uploadeImage = async (formData: FormData) => {
   const token = localStorage.getItem('token');
@@ -28,7 +29,8 @@ const uploadeImage = async (formData: FormData) => {
         );
         return retryResponse.data;
       } else {
-        console.log('Redirecting to login...');
+        localStorage.removeItem('token');
+        toast.error('something went wrong');
         redirect('/login');
       }
     } else {

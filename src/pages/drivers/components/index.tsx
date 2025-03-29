@@ -12,9 +12,19 @@ export default function AreaTable() {
   const {
     drivers,
     pagination,
+    error,
     isLoading
-  }: { drivers: Driver[]; pagination: any; isLoading: boolean } =
+  }: { drivers: Driver[]; pagination: any; isLoading: boolean; error: any } =
     useFetchDrivers(page);
+
+  if (error) {
+    console.log(error);
+    return (
+      <div>
+        <h1>something went wrong</h1>
+      </div>
+    );
+  }
   useEffect(() => {
     if (!isLoading) {
       setPage(pagination?.page);

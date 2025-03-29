@@ -35,9 +35,11 @@ export default function PopupModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        className={'!bg-background !px-1'}
+        className={'h-[90%] !bg-background !px-1'}
       >
-        <ScrollArea className="h-fit px-6  ">{renderModal(onClose)}</ScrollArea>
+        <ScrollArea className="h-[60%] px-6  ">
+          {renderModal(onClose)}
+        </ScrollArea>
       </Modal>
     </>
   );

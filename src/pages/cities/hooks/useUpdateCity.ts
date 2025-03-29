@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const updateCity = async ({
   id,
@@ -36,7 +37,8 @@ const updateCity = async ({
         });
         return retryResponse.data;
       } else {
-        console.log('Redirecting to login...');
+        localStorage.removeItem('token');
+        toast.error('something went wrong');
         redirect('/login');
       }
     } else if (error.response?.status === 422) {

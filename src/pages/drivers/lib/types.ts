@@ -46,8 +46,8 @@ export interface Driver {
   notes: string;
   profile_image: string | null;
   vehicle_image: string | null;
-  max_capacity: number;
-  vehicle_max_distance: number;
+  max_capacity: string;
+  vehicle_max_distance: string;
   status: 'ACTIVE' | 'INACTIVE';
   is_available: number;
   starting_work_at: Date;

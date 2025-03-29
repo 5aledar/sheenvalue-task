@@ -1,16 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export const createDriver = async (data: FormData) => {
   const token = localStorage.getItem('token');
 
   try {
+    console.log('ss');
     const response = await client.post('/admin/drivers', data, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
+    console.log(response.data);
+
     return response.data;
   } catch (error: any) {
     if (error.response?.status === 401) {
@@ -24,7 +28,8 @@ export const createDriver = async (data: FormData) => {
         });
         return retryResponse.data;
       } else {
-        console.log('Redirecting to login...');
+        localStorage.removeItem('token');
+        toast.error('something went wrong');
         redirect('/login');
       }
     } else if (error.response?.status === 422) {
