@@ -36,9 +36,7 @@ export const driverFormSchema = z
   .object({
     first_name: z.string().min(1, { message: 'First name is required' }),
     last_name: z.string().min(1, { message: 'Last name is required' }),
-    date_of_birth: z
-      .date()
-      .min(new Date('1900-01-01'), { message: 'Date of birth is required' }),
+    date_of_birth: z.string().min(1, { message: 'Date of birth is required' }),
     phone_number: z.string().min(1, { message: 'Phone number is required' }),
     email: z.string().email({ message: 'Invalid email format' }),
     nationality: z.string().min(1, { message: 'Nationality is required' }),
@@ -95,8 +93,8 @@ interface CityFormProps {
 
 const DriverForm = ({ modalClose, driver }: CityFormProps) => {
   const [previewImages, setPreviewImages] = useState({
-    DRIVER_PROFILE: null,
-    DRIVER_VEHICLE: null
+    DRIVER_PROFILE: driver ? driver.profile_image : '',
+    DRIVER_VEHICLE: driver ? driver?.vehicle_image : ''
   });
 
   const { mutate: uploadImage, isPending: isUploading } = useUploadImage();
@@ -142,20 +140,42 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
     }
   };
 
+  function formatTimeForBackend(timeValue: Date | string): string {
+    // If it's already a string in H:i format, return it
+    if (typeof timeValue === 'string' && /^\d{2}:\d{2}$/.test(timeValue)) {
+      return timeValue;
+    }
+
+    // If it's a Date object, format it
+    if (timeValue instanceof Date) {
+      const hours = timeValue.getHours().toString().padStart(2, '0');
+      const minutes = timeValue.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+
+    // Fallback to default time
+    return '08:00';
+  }
+
   const form = useForm<DriverFormValues>({
     resolver: zodResolver(driverFormSchema),
     defaultValues: driver
       ? {
           ...driver,
-          date_of_birth: driver.date_of_birth,
-          starting_work_at: driver.starting_work_at,
-          finishing_work_at: driver.finishing_work_at,
+          vehicle_max_distance: String(driver?.vehicle_max_distance),
+          max_capacity: String(driver?.max_capacity),
+          date_of_birth:
+            driver.date_of_birth instanceof Date
+              ? driver.date_of_birth.toISOString().split('T')[0]
+              : driver.date_of_birth,
+          starting_work_at: formatTimeForBackend(driver.starting_work_at),
+          finishing_work_at: formatTimeForBackend(driver.finishing_work_at),
           has_driving_license: driver.has_driving_license === 1,
           has_worked_before: driver.has_worked_before === 1,
           is_available: driver.is_available === 1,
           is_application_locked: driver.is_application_locked === 1,
-          profile_image: driver.profile_image ?? undefined,
-          vehicle_image: driver.vehicle_image ?? undefined,
+          profile_image: driver.profile_image,
+          vehicle_image: driver.vehicle_image,
           password: undefined,
           password_confirmation: undefined
         }
