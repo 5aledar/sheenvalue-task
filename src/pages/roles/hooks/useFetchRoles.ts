@@ -1,17 +1,21 @@
-import { useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-export const changePassword = async (data: any) => {
+export const fetchRoles = async (page: number) => {
   const token = localStorage.getItem('token');
 
   try {
-    const response = await client.put('/admin/auth/change-password', data, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response = await client.get(
+      `/admin/roles?page=${page}?include=permissions`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
+    );
+
     return response.data;
   } catch (error: any) {
     console.log('error', error);
@@ -21,9 +25,8 @@ export const changePassword = async (data: any) => {
 
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.put(
-          '/admin/auth/change-password',
-          data,
+        const retryResponse = await client.get(
+          `/admin/roles?page=${page}&include=permissions`,
           {
             headers: {
               Authorization: `Bearer ${newToken}`
@@ -41,11 +44,15 @@ export const changePassword = async (data: any) => {
     }
   }
 };
-
-export function useChangePassowrd() {
-  const mutation = useMutation({
-    mutationFn: changePassword
+export function useFetchRoles(page: number) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['roles', page],
+    queryFn: () => fetchRoles(page)
   });
 
-  return mutation;
+  return {
+    roles: data?.data?.items,
+    pagination: data?.data?.pagination,
+    isLoading
+  };
 }

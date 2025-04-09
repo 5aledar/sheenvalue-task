@@ -7,13 +7,11 @@ export const createDriver = async (data: FormData) => {
   const token = localStorage.getItem('token');
 
   try {
-    console.log('ss');
     const response = await client.post('/admin/drivers', data, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
-    console.log(response.data);
 
     return response.data;
   } catch (error: any) {

@@ -3,48 +3,6 @@ import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-// export const createCountry = async (data: any) => {
-//   const token = localStorage.getItem('token');
-//   try {
-//     console.log({ name: data.name, currency: data.currency, code: data.code });
-//     const response = await client.post(
-//       '/admin/countries',
-//       { data },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`
-//         }
-//       }
-//     );
-//     return response.data;
-//   } catch (error: any) {
-
-//     if (error.response?.status === 401) {
-//       const newToken = await refreshAuth();
-//       console.log('new token', newToken);
-
-//       if (newToken) {
-//         setHeaderToken(newToken);
-//         const retryResponse = await client.post(
-//           '/admin/countries',
-//           { name: data.name, currency: data.currency, code: data.code },
-//           {
-//             headers: {
-//               Authorization: `Bearer ${newToken}`
-//             }
-//           }
-//         );
-//         return retryResponse.data;
-//       } else {
-//         console.log('Redirecting to login...');
-//         redirect('/login');
-//       }
-//     } else {
-//       throw error;
-//     }
-//   }
-// };
-
 export const createCountry = async (data: any) => {
   const token = localStorage.getItem('token');
 

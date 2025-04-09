@@ -11,7 +11,6 @@ export const updateCountry = async ({
   data: any;
 }) => {
   const token = localStorage.getItem('token');
-  console.log(data);
 
   try {
     const response = await client.put(`/admin/countries/${id}`, data, {

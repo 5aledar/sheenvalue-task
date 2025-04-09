@@ -86,15 +86,15 @@ export const driverFormSchema = z
 
 type DriverFormValues = z.infer<typeof driverFormSchema>;
 
-interface CityFormProps {
+interface DriverFormProps {
   modalClose: () => void;
   driver?: Driver; // Optional city prop for updating
 }
 
-const DriverForm = ({ modalClose, driver }: CityFormProps) => {
+const DriverForm = ({ modalClose, driver }: DriverFormProps) => {
   const [previewImages, setPreviewImages] = useState({
-    DRIVER_PROFILE: driver ? driver.profile_image : '',
-    DRIVER_VEHICLE: driver ? driver?.vehicle_image : ''
+    DRIVER_PROFILE: driver ? driver.profile_image.url : '',
+    DRIVER_VEHICLE: driver ? driver?.vehicle_image.url : ''
   });
 
   const { mutate: uploadImage, isPending: isUploading } = useUploadImage();
@@ -112,8 +112,6 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
 
     uploadImage(formData, {
       onSuccess: (data) => {
-        console.log(data.data.url);
-
         if (type === 'DRIVER_PROFILE') {
           form.setValue('profile_image', data.data.path);
         } else {
@@ -174,8 +172,8 @@ const DriverForm = ({ modalClose, driver }: CityFormProps) => {
           has_worked_before: driver.has_worked_before === 1,
           is_available: driver.is_available === 1,
           is_application_locked: driver.is_application_locked === 1,
-          profile_image: driver.profile_image,
-          vehicle_image: driver.vehicle_image,
+          profile_image: driver.profile_image?.path!,
+          vehicle_image: driver.vehicle_image?.path,
           password: undefined,
           password_confirmation: undefined
         }

@@ -1,36 +1,35 @@
-import { useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-export const changePassword = async (data: any) => {
+export const fetchhPermissions = async () => {
   const token = localStorage.getItem('token');
 
   try {
-    const response = await client.put('/admin/auth/change-password', data, {
+    const response = await client.get(`/admin/profile`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
+
     return response.data;
   } catch (error: any) {
-    console.log('error', error);
-
     if (error.response?.status === 401) {
       const newToken = await refreshAuth();
 
       if (newToken) {
-        setHeaderToken(newToken);
-        const retryResponse = await client.put(
-          '/admin/auth/change-password',
-          data,
-          {
+        try {
+          setHeaderToken(newToken);
+          const retryResponse = await client.get('/admin/profile', {
             headers: {
               Authorization: `Bearer ${newToken}`
             }
-          }
-        );
-        return retryResponse.data;
+          });
+          return retryResponse.data;
+        } catch (error) {
+          console.log(error);
+        }
       } else {
         localStorage.removeItem('token');
         toast.error('something went wrong');
@@ -42,10 +41,15 @@ export const changePassword = async (data: any) => {
   }
 };
 
-export function useChangePassowrd() {
-  const mutation = useMutation({
-    mutationFn: changePassword
+export function useFetchProfile() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['permissions'],
+    queryFn: fetchhPermissions
   });
 
-  return mutation;
+  return {
+    permissions: data?.data?.items,
+    error,
+    isLoading
+  };
 }

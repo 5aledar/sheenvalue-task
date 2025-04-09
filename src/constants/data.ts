@@ -30,6 +30,12 @@ export const navItems: NavItem[] = [
     href: '/drivers',
     icon: 'driver',
     label: 'Driver'
+  },
+  {
+    title: 'Roles',
+    href: '/roles',
+    icon: 'role',
+    label: 'Role'
   }
 ];
 

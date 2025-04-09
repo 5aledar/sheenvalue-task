@@ -20,7 +20,6 @@ export const fetchDrivers = async (page: number) => {
   } catch (error: any) {
     if (error.response?.status === 401) {
       const newToken = await refreshAuth();
-      console.log('new token', newToken);
 
       if (newToken) {
         try {

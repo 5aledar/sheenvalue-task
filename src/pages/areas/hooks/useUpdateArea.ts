@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 
 const updateArea = async ({ id, data }: { id: number; data: any }) => {
   const token = localStorage.getItem('token');
-  console.log(data);
 
   try {
     const response = await client.put(`/admin/areas/${id}`, data, {

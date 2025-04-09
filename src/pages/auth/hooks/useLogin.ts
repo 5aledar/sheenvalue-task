@@ -6,7 +6,6 @@ const login = async (data) => {
     'https://dispatcher.mouhannadabdalrhem.online/api/v1/admin/auth/login',
     data
   );
-  console.log(response);
 
   return response.data;
 };

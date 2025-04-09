@@ -7,7 +7,6 @@ export const logout = async (data: any) => {
   const token = localStorage.getItem('token');
 
   try {
-    console.log(data);
     const response = await client.post(
       '/admin/auth/logout',
       {},

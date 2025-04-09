@@ -27,7 +27,6 @@ export const refreshAuth = async () => {
         }
       }
     );
-    console.log(response);
 
     const newToken = response.data.data.token;
 

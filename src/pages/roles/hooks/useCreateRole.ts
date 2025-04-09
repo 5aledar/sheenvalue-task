@@ -3,22 +3,11 @@ import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const updateCity = async ({
-  id,
-  data
-}: {
-  id: number;
-  data: {
-    name_en: string;
-    name_ar: string;
-    name_tr: string;
-    country_id: string;
-  };
-}) => {
+export const createRole = async (data: any) => {
   const token = localStorage.getItem('token');
 
   try {
-    const response = await client.put(`/admin/cities/${id}`, data, {
+    const response = await client.post('/admin/roles', data, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -29,7 +18,7 @@ const updateCity = async ({
       const newToken = await refreshAuth();
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.put(`/admin/cities/${id}`, data, {
+        const retryResponse = await client.post('/admin/roles', data, {
           headers: {
             Authorization: `Bearer ${newToken}`
           }
@@ -50,14 +39,15 @@ const updateCity = async ({
     }
   }
 };
-
-export function useUpdateCity() {
+export function useCreateRole() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: updateCity,
+  const mutation = useMutation({
+    mutationFn: createRole,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cities'] });
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
     }
   });
+
+  return mutation;
 }

@@ -44,8 +44,14 @@ export interface Driver {
   has_driving_license: number;
   has_worked_before: number;
   notes: string;
-  profile_image: string | null;
-  vehicle_image: string | null;
+  profile_image: {
+    path: string;
+    url: string;
+  };
+  vehicle_image: {
+    path: string;
+    url: string;
+  };
   max_capacity: string;
   vehicle_max_distance: string;
   status: 'ACTIVE' | 'INACTIVE';

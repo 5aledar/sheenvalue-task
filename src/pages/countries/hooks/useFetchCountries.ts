@@ -12,7 +12,6 @@ export const fetchCountries = async (page?: number) => {
         Authorization: `Bearer ${token}`
       }
     });
-    console.log(response.data);
 
     return response.data;
   } catch (error: any) {
@@ -20,7 +19,6 @@ export const fetchCountries = async (page?: number) => {
 
     if (error.response?.status === 401) {
       const newToken = await refreshAuth();
-      console.log('new token', newToken);
 
       if (newToken) {
         setHeaderToken(newToken);

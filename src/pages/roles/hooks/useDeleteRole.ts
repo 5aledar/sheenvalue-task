@@ -3,22 +3,11 @@ import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const updateCity = async ({
-  id,
-  data
-}: {
-  id: number;
-  data: {
-    name_en: string;
-    name_ar: string;
-    name_tr: string;
-    country_id: string;
-  };
-}) => {
+const deleteRole = async (id: number) => {
   const token = localStorage.getItem('token');
 
   try {
-    const response = await client.put(`/admin/cities/${id}`, data, {
+    const response = await client.delete(`/admin/roles/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -29,7 +18,7 @@ const updateCity = async ({
       const newToken = await refreshAuth();
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.put(`/admin/cities/${id}`, data, {
+        const retryResponse = await client.delete(`/admin/roles/${id}`, {
           headers: {
             Authorization: `Bearer ${newToken}`
           }
@@ -40,24 +29,19 @@ const updateCity = async ({
         toast.error('something went wrong');
         redirect('/login');
       }
-    } else if (error.response?.status === 422) {
-      console.log('Validation Error:', error.response.data);
-      throw new Error(
-        'Validation failed: ' + JSON.stringify(error.response.data)
-      );
     } else {
       throw error;
     }
   }
 };
 
-export function useUpdateCity() {
+export function useDeleteRole() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: updateCity,
+    mutationFn: deleteRole,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cities'] });
+      queryClient.invalidateQueries({ queryKey: ['roles'] });
     }
   });
 }

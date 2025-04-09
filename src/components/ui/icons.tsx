@@ -32,7 +32,8 @@ import {
   MapIcon,
   X,
   MapPinned,
-  CarFront
+  CarFront,
+  UserRoundCog
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -68,6 +69,7 @@ export const Icons = {
   laptop: Laptop,
   area: MapPinned,
   driver: CarFront,
+  role: UserRoundCog,
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

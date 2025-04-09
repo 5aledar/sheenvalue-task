@@ -4,6 +4,7 @@ import CityPage from '@/pages/cities';
 import CountryPage from '@/pages/countries';
 import DriverPage from '@/pages/drivers';
 import NotFound from '@/pages/not-found';
+import RolesPage from '@/pages/roles';
 import { Suspense, lazy } from 'react';
 import { Navigate, Outlet, useRoutes } from 'react-router-dom';
 
@@ -44,6 +45,10 @@ export default function AppRouter() {
         {
           path: 'drivers',
           element: <DriverPage />
+        },
+        {
+          path: 'roles',
+          element: <RolesPage />
         },
         {
           path: '/change-password',
