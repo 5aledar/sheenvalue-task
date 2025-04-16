@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/tooltip';
 import { usePathname } from '@/routes/hooks';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -30,6 +31,7 @@ export default function DashboardNav({
   if (!items?.length) {
     return null;
   }
+  const { t } = useTranslation();
 
   return (
     <nav className="grid items-start gap-2">
@@ -56,7 +58,9 @@ export default function DashboardNav({
                     <Icon className={`ml-2.5 size-5`} />
 
                     {isMobileNav || (!isMinimized && !isMobileNav) ? (
-                      <span className="mr-2 truncate">{item.title}</span>
+                      <span className="mr-2 truncate">
+                        {t(String(item.label))}
+                      </span>
                     ) : (
                       ''
                     )}
@@ -68,7 +72,7 @@ export default function DashboardNav({
                   sideOffset={8}
                   className={!isMinimized ? 'hidden' : 'inline-block'}
                 >
-                  {item.title}
+                  item.title
                 </TooltipContent>
               </Tooltip>
             )

@@ -14,7 +14,6 @@ type SidebarProps = {
 export default function Sidebar({ className }: SidebarProps) {
   const { isMinimized, toggle } = useSidebar();
   const [status, setStatus] = useState(false);
-
   const handleToggle = () => {
     setStatus(true);
     toggle();

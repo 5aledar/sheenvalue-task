@@ -5,37 +5,37 @@ export const navItems: NavItem[] = [
     title: 'Dashboard',
     href: '/',
     icon: 'dashboard',
-    label: 'Dashboard'
+    label: 'sidebar.dashboard'
   },
   {
     title: 'Countries',
     href: '/countries',
     icon: 'country',
-    label: 'Country'
+    label: 'sidebar.countries'
   },
   {
     title: 'Cities',
     href: '/cities',
     icon: 'city',
-    label: 'City'
+    label: 'sidebar.cities'
   },
   {
     title: 'Areas',
     href: '/areas',
     icon: 'area',
-    label: 'Area'
+    label: 'sidebar.areas'
   },
   {
     title: 'Drivers',
     href: '/drivers',
     icon: 'driver',
-    label: 'Driver'
+    label: 'sidebar.drivers'
   },
   {
     title: 'Roles',
     href: '/roles',
     icon: 'role',
-    label: 'Role'
+    label: 'sidebar.roles'
   }
 ];
 

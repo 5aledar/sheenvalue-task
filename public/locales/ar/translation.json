@@ -1,0 +1,16 @@
+{
+  "sidebar": {
+    "dashboard": "لوحة التحكم",
+    "countries": "الدول",
+    "cities": "المدن",
+    "areas": "المناطق",
+    "drivers": "السائقون",
+    "roles": "الأدوار"
+  },
+  "auth": {
+    "logout": "تسجيل الخروج"
+  },
+  "actions": {
+    "add": "إضافة"
+  }
+}

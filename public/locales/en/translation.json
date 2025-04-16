@@ -1,0 +1,16 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "countries": "Countries",
+    "cities": "Cities",
+    "areas": "Areas",
+    "drivers": "Drivers",
+    "roles": "Roles"
+  },
+  "auth": {
+    "logout": "Logout"
+  },
+  "actions": {
+    "add": "Add New"
+  }
+}

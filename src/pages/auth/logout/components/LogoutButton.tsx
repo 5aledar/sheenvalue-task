@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useLogout } from '../../hooks/useLogout';
 import { useRouter } from '@/routes/hooks';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface LogoutProps {
   isMinimized?: boolean;
@@ -10,7 +11,7 @@ interface LogoutProps {
 const LogoutButton = ({ isMinimized }: LogoutProps) => {
   const router = useRouter();
   const { mutate: logout, isPending } = useLogout();
-
+  const { t } = useTranslation();
   const handleLogout = () => {
     logout(undefined, {
       onSuccess: () => {
@@ -31,7 +32,7 @@ const LogoutButton = ({ isMinimized }: LogoutProps) => {
       disabled={isPending}
     >
       <LogOutIcon className="w-4" />
-      {!isMinimized && 'Logout'}
+      {!isMinimized && t('auth.logout')}
     </Button>
   );
 };
