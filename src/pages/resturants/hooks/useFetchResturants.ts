@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
-import toast from 'react-hot-toast';
 
 export const fetchResturants = async (page: number) => {
   const token = localStorage.getItem('res_token');

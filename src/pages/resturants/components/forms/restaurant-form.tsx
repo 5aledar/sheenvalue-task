@@ -31,7 +31,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { LocationPicker } from '../LocationPicker';
 
 const restaurantFormSchema = z.object({
   country_id: z.string().min(1, { message: 'Country is required' }),

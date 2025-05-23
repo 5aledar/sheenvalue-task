@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../lib/axiosClient';
 import { redirect } from 'react-router-dom';
-import toast from 'react-hot-toast';
 
 export const fetchCities = async (coutryId: string) => {
   const token = localStorage.getItem('res_token');
@@ -34,6 +33,10 @@ export const fetchCities = async (coutryId: string) => {
           }
         );
         return retryResponse.data;
+      } else {
+        localStorage.removeItem('res_token');
+        // toast.error('something went wrong');
+        redirect('/login');
       }
     } else {
       throw error;
