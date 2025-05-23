@@ -8,35 +8,35 @@ export const navItems: NavItem[] = [
     label: 'sidebar.dashboard'
   },
   {
-    title: 'Countries',
-    href: '/countries',
-    icon: 'country',
-    label: 'sidebar.countries'
-  },
-  {
-    title: 'Cities',
-    href: '/cities',
-    icon: 'city',
-    label: 'sidebar.cities'
-  },
-  {
-    title: 'Areas',
-    href: '/areas',
-    icon: 'area',
-    label: 'sidebar.areas'
-  },
-  {
-    title: 'Drivers',
-    href: '/drivers',
-    icon: 'driver',
-    label: 'sidebar.drivers'
-  },
-  {
-    title: 'Roles',
-    href: '/roles',
-    icon: 'role',
-    label: 'sidebar.roles'
+    title: 'Resturants',
+    href: '/resturants',
+    icon: 'pizza',
+    label: 'sidebar.resturant'
   }
+  // {
+  //   title: 'Cities',
+  //   href: '/cities',
+  //   icon: 'city',
+  //   label: 'sidebar.cities'
+  // },
+  // {
+  //   title: 'Areas',
+  //   href: '/areas',
+  //   icon: 'area',
+  //   label: 'sidebar.areas'
+  // },
+  // {
+  //   title: 'Drivers',
+  //   href: '/drivers',
+  //   icon: 'driver',
+  //   label: 'sidebar.drivers'
+  // },
+  // {
+  //   title: 'Roles',
+  //   href: '/roles',
+  //   icon: 'role',
+  //   label: 'sidebar.roles'
+  // }
 ];
 
 export const users = [

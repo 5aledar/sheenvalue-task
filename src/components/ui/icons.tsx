@@ -1,3 +1,4 @@
+import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 import {
   AlertTriangle,
   ArrowRight,
@@ -25,14 +26,10 @@ import {
   SunMedium,
   Trash,
   Twitter,
-  Building2,
   User,
   User2Icon,
   UserX2Icon,
-  MapIcon,
   X,
-  MapPinned,
-  CarFront,
   UserRoundCog
 } from 'lucide-react';
 
@@ -64,11 +61,12 @@ export const Icons = {
   pizza: Pizza,
   sun: SunMedium,
   moon: Moon,
-  country: MapIcon,
-  city: Building2,
+  // country: MapIcon,
+  // city: Building2,
   laptop: Laptop,
-  area: MapPinned,
-  driver: CarFront,
+  // area: MapPinned,
+  // driver: CarFront,
+  resturant: HamburgerMenuIcon,
   role: UserRoundCog,
   gitHub: ({ ...props }: LucideProps) => (
     <svg

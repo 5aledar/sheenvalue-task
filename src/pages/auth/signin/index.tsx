@@ -7,7 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function SignInPage() {
   const navigate = useNavigate();
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('res_token');
 
     if (token) {
       navigate('/');

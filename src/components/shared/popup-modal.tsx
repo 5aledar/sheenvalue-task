@@ -23,9 +23,9 @@ export default function PopupModal({
   return (
     <>
       <Button
-        className={icon == 'Edit' ? 'w-full p-2' : 'text-xs md:text-sm'}
+        className={icon === 'Edit' ? 'w-full p-2' : 'text-xs md:text-sm'}
         onClick={() => setIsOpen(true)}
-        variant={icon == 'Edit' ? 'secondary' : 'default'}
+        variant={icon === 'Edit' ? 'secondary' : 'default'}
       >
         {icon === 'Edit' ? (
           <Edit className="mr-1 w-4" />
@@ -34,15 +34,17 @@ export default function PopupModal({
         )}
         {title || t('actions.add')}
       </Button>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        className={'h-[80%] !bg-background !px-1'}
-      >
-        <ScrollArea className="h-[55%] px-6  ">
-          {renderModal(onClose)}
-        </ScrollArea>
-      </Modal>
+      {isOpen && (
+        <Modal
+          isOpen={isOpen}
+          onClose={onClose}
+          className={'h-[80%] !bg-background !px-1'}
+        >
+          <ScrollArea className="h-[55%] px-6">
+            {renderModal(onClose)}
+          </ScrollArea>
+        </Modal>
+      )}
     </>
   );
 }

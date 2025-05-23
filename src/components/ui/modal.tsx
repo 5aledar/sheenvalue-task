@@ -32,10 +32,10 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onChange}>
-      <DialogContent className={`${className} !w-[80%] max-w-[2000px]`}>
+      <DialogContent className={`${className || ''} !w-[80%] max-w-[2000px]`}>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          {title && <DialogTitle>{title}</DialogTitle>}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <div>{children}</div>
       </DialogContent>

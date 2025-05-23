@@ -15,7 +15,7 @@ const LogoutButton = ({ isMinimized }: LogoutProps) => {
   const handleLogout = () => {
     logout(undefined, {
       onSuccess: () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('res_token');
         toast.success('Logged out successfully');
         router.push('/login');
       },

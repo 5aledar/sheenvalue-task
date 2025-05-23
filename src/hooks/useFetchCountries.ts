@@ -1,34 +1,29 @@
-import { useMutation } from '@tanstack/react-query';
-import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
+import { useQuery } from '@tanstack/react-query';
+import { client, setHeaderToken, refreshAuth } from '../lib/axiosClient';
 import { redirect } from 'react-router-dom';
-import toast from 'react-hot-toast';
 
-export const logout = async (data: any) => {
+export const fetchCountries = async () => {
   const token = localStorage.getItem('res_token');
+  // console.log(token);
 
   try {
-    const response = await client.post(
-      '/restaurant/auth/logout',
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    const response = await client.get(`/restaurant/countries?isPaginated=0`, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    );
+    });
+
     return response.data;
   } catch (error: any) {
     console.log('error', error);
 
     if (error.response?.status === 401) {
       const newToken = await refreshAuth();
-      console.log('new token', newToken);
 
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.post(
-          '/restaurant/auth/logout',
-          {},
+        const retryResponse = await client.get(
+          '/restaurant/countries?isPaginated=0',
           {
             headers: {
               Authorization: `Bearer ${newToken}`
@@ -46,10 +41,15 @@ export const logout = async (data: any) => {
     }
   }
 };
-export function useLogout() {
-  const mutation = useMutation({
-    mutationFn: logout
+export function useFetchCountries() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['countries'],
+    queryFn: () => fetchCountries()
   });
 
-  return mutation;
+  return {
+    countries: data?.data,
+    // pagination: data?.data?.pagination,
+    isLoading
+  };
 }

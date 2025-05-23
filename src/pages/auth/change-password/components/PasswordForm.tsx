@@ -49,7 +49,7 @@ export default function PasswordForm() {
   const onSubmit = async (data: any) => {
     changePassword(data, {
       onSuccess: () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('res_token');
         router.push('/login');
         toast.success('Password Changed Successfully');
       },

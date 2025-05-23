@@ -5,7 +5,8 @@
     "cities": "Cities",
     "areas": "Areas",
     "drivers": "Drivers",
-    "roles": "Roles"
+    "roles": "Roles",
+    "resturant": "Resturants"
   },
   "auth": {
     "logout": "Logout"

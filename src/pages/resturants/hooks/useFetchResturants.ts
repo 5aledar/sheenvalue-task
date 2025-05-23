@@ -1,34 +1,29 @@
-import { useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
 import { redirect } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-export const logout = async (data: any) => {
+export const fetchResturants = async (page: number) => {
   const token = localStorage.getItem('res_token');
 
   try {
-    const response = await client.post(
-      '/restaurant/auth/logout',
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    const response = await client.get(`/restaurant/restaurants?page=${page}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    );
+    });
+
     return response.data;
   } catch (error: any) {
     console.log('error', error);
 
     if (error.response?.status === 401) {
       const newToken = await refreshAuth();
-      console.log('new token', newToken);
 
       if (newToken) {
         setHeaderToken(newToken);
-        const retryResponse = await client.post(
-          '/restaurant/auth/logout',
-          {},
+        const retryResponse = await client.get(
+          `/restaurant/restaurants?page=${page}`,
           {
             headers: {
               Authorization: `Bearer ${newToken}`
@@ -46,10 +41,15 @@ export const logout = async (data: any) => {
     }
   }
 };
-export function useLogout() {
-  const mutation = useMutation({
-    mutationFn: logout
+export function useFetchResturants(page: number) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['resturants', page],
+    queryFn: () => fetchResturants(page)
   });
 
-  return mutation;
+  return {
+    resturants: data?.data?.items,
+    pagination: data?.data?.pagination,
+    isLoading
+  };
 }

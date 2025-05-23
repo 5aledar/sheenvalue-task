@@ -14,12 +14,12 @@ export const removeHeaderToken = () => {
 };
 
 export const refreshAuth = async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('res_token');
   if (!token) return null;
 
   try {
     const response = await client.post(
-      '/admin/auth/refresh',
+      '/restaurant/auth/refresh',
       {},
       {
         headers: {
@@ -30,7 +30,7 @@ export const refreshAuth = async () => {
 
     const newToken = response.data.data.token;
 
-    localStorage.setItem('token', newToken);
+    localStorage.setItem('res_token', newToken);
     return newToken;
   } catch (error) {
     console.error('Token refresh failed', error);

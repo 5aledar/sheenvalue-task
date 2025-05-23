@@ -1,10 +1,6 @@
-import AreaPage from '@/pages/areas';
 import ChangePasswordPage from '@/pages/auth/change-password';
-import CityPage from '@/pages/cities';
-import CountryPage from '@/pages/countries';
-import DriverPage from '@/pages/drivers';
 import NotFound from '@/pages/not-found';
-import RolesPage from '@/pages/roles';
+import ResturantPage from '@/pages/resturants';
 import { Suspense, lazy } from 'react';
 import { Navigate, Outlet, useRoutes } from 'react-router-dom';
 
@@ -27,32 +23,38 @@ export default function AppRouter() {
       ),
       children: [
         {
+          path: '/',
           element: <DashboardPage />,
           index: true
         },
-        {
-          path: 'countries',
-          element: <CountryPage />
-        },
-        {
-          path: 'cities',
-          element: <CityPage />
-        },
-        {
-          path: 'areas',
-          element: <AreaPage />
-        },
-        {
-          path: 'drivers',
-          element: <DriverPage />
-        },
-        {
-          path: 'roles',
-          element: <RolesPage />
-        },
+        // {
+        //   path: 'countries',
+        //   element: <CountryPage />
+        // },
+        // {
+        //   path: 'cities',
+        //   element: <CityPage />
+        // },
+        // {
+        //   path: 'areas',
+        //   element: <AreaPage />
+        // },
+        // {
+        //   path: 'drivers',
+        //   element: <DriverPage />
+        // },
+        // {
+        //   path: 'roles',
+        //   element: <RolesPage />
+        // },
         {
           path: '/change-password',
           element: <ChangePasswordPage />,
+          index: true
+        },
+        {
+          path: '/resturants',
+          element: <ResturantPage />,
           index: true
         }
       ]
