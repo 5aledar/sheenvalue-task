@@ -31,6 +31,13 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { LocationPicker } from '../LocationPicker';
+import { useTranslation } from 'react-i18next';
+
+// Create a language context for the form
+// const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
+// Use i18next for translations
+const { t } = useTranslation();
 
 const restaurantFormSchema = z.object({
   country_id: z.string().min(1, { message: 'Country is required' }),
@@ -137,8 +144,41 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
   );
   const { countries } = useFetchCountries();
 
-  const { cities } = useFetchCities(form.watch('country_id'));
+  // Fetch cities based on selected country
+  const { cities, isLoading: isLoadingCities } = useFetchCities(
+    form.watch('country_id')
+  );
+
+  // Fetch areas based on selected city
   const { areas } = useFetchAreas(form.watch('city_id'));
+
+  // Ensure we fetch cities and areas when editing a restaurant
+  useEffect(() => {
+    if (resturant && resturant.country_id) {
+      // This will trigger the useFetchCities hook
+      form.setValue('country_id', resturant.country_id.toString());
+    }
+  }, [resturant, form]);
+
+  // Ensure we fetch areas when cities are loaded
+  useEffect(() => {
+    if (
+      resturant &&
+      resturant.city_id &&
+      !isLoadingCities &&
+      cities?.length > 0
+    ) {
+      // This will trigger the useFetchAreas hook
+      form.setValue('city_id', resturant.city_id.toString());
+    }
+  }, [resturant, cities, isLoadingCities, form]);
+
+  // Ensure area is selected when areas are loaded
+  useEffect(() => {
+    if (resturant && resturant.area_id && areas?.length > 0) {
+      form.setValue('area_id', resturant.area_id.toString());
+    }
+  }, [resturant, areas, form]);
 
   const handleImageChange = (type: 'RESTAURANT_LOGO', file: File) => {
     const formData = new FormData();
@@ -251,10 +291,11 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
     }
   };
 
+  // Set initial values when editing a restaurant
   useEffect(() => {
     try {
+      // Set logo preview
       if (resturant?.logo) {
-        // For existing restaurants, use the logo URL directly
         const logoUrl = resturant.logo;
         console.log('Setting initial logo preview:', logoUrl);
 
@@ -265,8 +306,17 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
           console.warn('Invalid logo URL in restaurant data:', logoUrl);
         }
       }
+
+      // Log the initial values for debugging
+      if (resturant) {
+        console.log('Initial form values:', {
+          country_id: resturant.country_id,
+          city_id: resturant.city_id,
+          area_id: resturant.area_id
+        });
+      }
     } catch (err) {
-      console.error('Error setting initial logo preview:', err);
+      console.error('Error setting initial values:', err);
     }
   }, [resturant]);
 
@@ -290,7 +340,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="country_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Country</FormLabel>
+                  <FormLabel>{t('country')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -298,11 +348,11 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select country" />
+                        <SelectValue placeholder={t('selectCountry')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {countries?.map((country) => (
+                      {countries?.map((country: any) => (
                         <SelectItem
                           key={country.id}
                           value={country.id.toString()}
@@ -322,7 +372,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="city_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>City</FormLabel>
+                  <FormLabel>{t('city')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -332,11 +382,11 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select city" />
+                        <SelectValue placeholder={t('selectCity')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {cities?.map((city) => (
+                      {cities?.map((city: any) => (
                         <SelectItem key={city.id} value={city.id.toString()}>
                           {city.name_en}
                         </SelectItem>
@@ -353,7 +403,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="area_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Area</FormLabel>
+                  <FormLabel>{t('area')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -363,11 +413,11 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select area" />
+                        <SelectValue placeholder={t('selectArea')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {areas?.map((area) => (
+                      {areas?.map((area: any) => (
                         <SelectItem key={area.id} value={area.id.toString()}>
                           {area.name_en}
                         </SelectItem>
@@ -385,10 +435,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="address_en"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address (English)</FormLabel>
+                  <FormLabel>{t('address')} (English)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Address in English"
+                      placeholder="العنوان بالإنجليزية"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -403,10 +453,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="address_ar"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address (Arabic)</FormLabel>
+                  <FormLabel>{t('address')} (Arabic)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Address in Arabic"
+                      placeholder="العنوان بالعربية"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -421,10 +471,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="address_tr"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address (Turkish)</FormLabel>
+                  <FormLabel>{t('address')} (Turkish)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Address in Turkish"
+                      placeholder="العنوان بالتركية"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -440,10 +490,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="name_en"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name (English)</FormLabel>
+                  <FormLabel>{t('name')} (English)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Name in English"
+                      placeholder="الاسم بالإنجليزية"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -458,10 +508,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="name_ar"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name (Arabic)</FormLabel>
+                  <FormLabel>{t('name')} (Arabic)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Name in Arabic"
+                      placeholder="الاسم بالعربية"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -476,10 +526,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="name_tr"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name (Turkish)</FormLabel>
+                  <FormLabel>{t('name')} (Turkish)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Name in Turkish"
+                      placeholder="الاسم بالتركية"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -495,10 +545,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t('email')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Email"
+                      placeholder="البريد الإلكتروني"
                       type="email"
                       {...field}
                       disabled={isCreating || isUpdating}
@@ -514,10 +564,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                  <FormLabel>{t('phone')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Phone"
+                      placeholder="الهاتف"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -532,10 +582,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="contact_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Number</FormLabel>
+                  <FormLabel>{t('contactNumber')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Contact Number"
+                      placeholder="رقم الاتصال"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -551,7 +601,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="logo"
               render={({}) => (
                 <FormItem className="col-span-2">
-                  <FormLabel>Logo</FormLabel>
+                  <FormLabel>{t('logo')}</FormLabel>
                   {previewImages.RESTAURANT_LOGO ? (
                     <div className="relative">
                       <img
@@ -587,80 +637,75 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               )}
             />
 
-            {/* Coordinates */}
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Latitude</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Latitude"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Map Location Picker */}
+            <div className="col-span-2">
+              <FormItem>
+                <FormLabel>{t('locationMap')}</FormLabel>
+                <FormControl>
+                  <div className="w-full">
+                    {!isCreating && !isUpdating ? (
+                      <LocationPicker
+                        initialLat={form.watch('latitude') || '33.5138'}
+                        initialLng={form.watch('longitude') || '36.2765'}
+                        onLocationSelect={(lat, lng) => {
+                          form.setValue('latitude', lat.toString(), {
+                            shouldValidate: true,
+                            shouldDirty: true
+                          });
+                          form.setValue('longitude', lng.toString(), {
+                            shouldValidate: true,
+                            shouldDirty: true
+                          });
+                          console.log('Location updated:', { lat, lng });
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-80 w-full items-center justify-center rounded-md bg-gray-100">
+                        <p className="text-muted-foreground">
+                          Map loading is disabled while form is submitting...
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </FormControl>
+              </FormItem>
 
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Longitude</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Longitude"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* <div className="col-span-2">
-              <FormLabel>Location on Map</FormLabel>
-              <LocationPicker
-                cityName={"damascus"
-                  // cities?.find(c => c.id.toString() === form.watch('city_id'))?.name_en || ''
-                }
-                onLocationSelect={(lat, lng) => {
-                  form.setValue('latitude', lat.toString());
-                  form.setValue('longitude', lng.toString());
-                }}
-                initialPosition={
-                  form.watch('latitude') && form.watch('longitude')
-                    ? [
-                      parseFloat(form.watch('latitude')),
-                      parseFloat(form.watch('longitude'))
-                    ]
-                    : undefined
-                }
-              />
-              <div className="mt-2 text-sm text-muted-foreground">
-                Click on the map to set the restaurant location
+              {/* Hidden fields for latitude and longitude - now managed by the LocationPicker */}
+              <div className="hidden">
+                <FormField
+                  control={form.control}
+                  name="latitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="longitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              {form.formState.errors.latitude && (
-                <p className="text-sm font-medium text-destructive">
-                  {form.formState.errors.latitude.message}
-                </p>
-              )}
-            </div> */}
+            </div>
             {/* Social Media */}
             <FormField
               control={form.control}
               name="facebook_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Facebook URL</FormLabel>
+                  <FormLabel>{t('facebookUrl')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Facebook URL"
+                      placeholder="رابط فيسبوك"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -675,10 +720,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="instagram_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Instagram URL</FormLabel>
+                  <FormLabel>{t('instagramUrl')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Instagram URL"
+                      placeholder="رابط انستغرام"
                       {...field}
                       disabled={isCreating || isUpdating}
                     />
@@ -695,7 +740,9 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Available</FormLabel>
+                    <FormLabel className="text-base">
+                      {t('available')}
+                    </FormLabel>
                   </div>
                   <FormControl>
                     <Switch
@@ -714,7 +761,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="start_time"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Opening Time</FormLabel>
+                  <FormLabel>{t('openingTime')}</FormLabel>
                   <FormControl>
                     <Input
                       type="time"
@@ -732,7 +779,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
               name="end_time"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Closing Time</FormLabel>
+                  <FormLabel>{t('closingTime')}</FormLabel>
                   <FormControl>
                     <Input
                       type="time"

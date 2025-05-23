@@ -1,106 +1,94 @@
 // components/location-picker.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { Input } from '@/components/ui/input';
 
-// Fix for default marker icons
-const DefaultIcon = L.icon({
-  iconUrl: '/marker-icon.png',
-  iconRetinaUrl: '/marker-icon-2x.png',
-  shadowUrl: '/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
+// Lazy load the MapComponent to avoid SSR issues
+const MapComponent = lazy(() => import('./MapComponent'));
 
 interface LocationPickerProps {
-  cityName: string;
-  onLocationSelect: (lat: number, lng: number) => void;
-  initialPosition?: [number, number];
+  onLocationSelect?: (lat: number, lng: number) => void;
+  initialLat?: string;
+  initialLng?: string;
 }
 
-const LocationMarker = ({
-  initialPosition,
-  onLocationSelect
-}: {
-  initialPosition?: [number, number];
-  onLocationSelect: (lat: number, lng: number) => void;
-}) => {
-  const [position, setPosition] = useState<[number, number] | null>(
-    initialPosition || null
-  );
-
-  useMapEvents({
-    click(e) {
-      const newPosition: [number, number] = [e.latlng.lat, e.latlng.lng];
-      setPosition(newPosition);
-      onLocationSelect(newPosition[0], newPosition[1]);
-    }
-  });
-
-  return position ? <Marker position={position} /> : null;
-};
-
+// Main LocationPicker component
 export const LocationPicker = ({
-  cityName,
   onLocationSelect,
-  initialPosition
+  initialLat = '33.5138',
+  initialLng = '36.2765'
 }: LocationPickerProps) => {
-  const [mapCenter, setMapCenter] = useState<[number, number]>([0, 0]);
-  const [loading, setLoading] = useState(true);
+  // State for coordinates
+  const [lat, setLat] = useState(initialLat);
+  const [lng, setLng] = useState(initialLng);
 
-  useEffect(() => {
-    const fetchCityCoordinates = async () => {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}`
-        );
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-          const { lat, lon } = data[0];
-          setMapCenter([parseFloat(lat), parseFloat(lon)]);
-          if (!initialPosition) {
-            onLocationSelect(parseFloat(lat), parseFloat(lon));
-          }
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching city coordinates:', error);
-        setLoading(false);
-      }
-    };
-
-    if (cityName) {
-      fetchCityCoordinates();
+  // Update coordinates when input fields change
+  const updateCoordinates = (newLat: number, newLng: number) => {
+    if (!isNaN(newLat) && !isNaN(newLng) && onLocationSelect) {
+      onLocationSelect(newLat, newLng);
     }
-  }, [cityName, initialPosition, onLocationSelect]);
+  };
 
-  if (loading) {
-    return <div>Loading map...</div>;
-  }
+  // Handle map click
+  const handleMapClick = (newLat: number, newLng: number) => {
+    console.log('LocationPicker received map click:', { newLat, newLng });
+    setLat(newLat.toFixed(6));
+    setLng(newLng.toFixed(6));
+
+    if (onLocationSelect) {
+      onLocationSelect(newLat, newLng);
+    }
+  };
+
+  // Log when props change
+  useEffect(() => {
+    console.log('LocationPicker props updated:', { initialLat, initialLng });
+  }, [initialLat, initialLng]);
 
   return (
-    <div className="h-96 w-full overflow-hidden rounded-md">
-      <MapContainer
-        center={mapCenter}
-        zoom={12}
-        style={{ height: '100%', width: '100%' }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    <div className="w-full">
+      <div className="h-80 w-full overflow-hidden rounded-md border border-gray-200 shadow-sm">
+        <Suspense
+          fallback={
+            <div className="flex h-full w-full items-center justify-center bg-gray-100">
+              <p className="text-muted-foreground">Loading map...</p>
+            </div>
+          }
+        >
+          {/* Use a key to prevent re-rendering on every coordinate change */}
+          <MapComponent
+            key="map-component"
+            lat={parseFloat(lat) || 33.5138}
+            lng={parseFloat(lng) || 36.2765}
+            onMapClick={handleMapClick}
+          />
+        </Suspense>
+      </div>
+
+      {/* Latitude and longitude inputs hidden as requested */}
+      <div className="hidden">
+        <Input
+          id="latitude"
+          value={lat}
+          onChange={(e) => {
+            setLat(e.target.value);
+            const validLat = parseFloat(e.target.value);
+            const validLng = parseFloat(lng);
+            updateCoordinates(validLat, validLng);
+          }}
         />
-        <LocationMarker
-          initialPosition={initialPosition}
-          onLocationSelect={onLocationSelect}
+        <Input
+          id="longitude"
+          value={lng}
+          onChange={(e) => {
+            setLng(e.target.value);
+            const validLat = parseFloat(lat);
+            const validLng = parseFloat(e.target.value);
+            updateCoordinates(validLat, validLng);
+          }}
         />
-      </MapContainer>
+      </div>
     </div>
   );
 };

@@ -13,5 +13,23 @@
   },
   "actions": {
     "add": "إضافة"
-  }
+  },
+  "country": "الدولة",
+  "city": "المدينة",
+  "area": "المنطقة",
+  "address": "العنوان",
+  "name": "الاسم",
+  "email": "البريد الإلكتروني",
+  "phone": "الهاتف",
+  "contactNumber": "رقم الاتصال",
+  "facebookUrl": "رابط فيسبوك",
+  "instagramUrl": "رابط انستغرام",
+  "logo": "الشعار",
+  "locationMap": "خريطة الموقع",
+  "available": "متاح",
+  "openingTime": "وقت الافتتاح",
+  "closingTime": "وقت الإغلاق",
+  "selectCountry": "اختر الدولة",
+  "selectCity": "اختر المدينة",
+  "selectArea": "اختر المنطقة"
 }

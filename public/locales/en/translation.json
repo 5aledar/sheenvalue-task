@@ -13,5 +13,23 @@
   },
   "actions": {
     "add": "Add New"
-  }
+  },
+  "country": "Country",
+  "city": "City",
+  "area": "Area",
+  "address": "Address",
+  "name": "Name",
+  "email": "Email",
+  "phone": "Phone",
+  "contactNumber": "Contact Number",
+  "facebookUrl": "Facebook URL",
+  "instagramUrl": "Instagram URL",
+  "logo": "Logo",
+  "locationMap": "Location Map",
+  "available": "Available",
+  "openingTime": "Opening Time",
+  "closingTime": "Closing Time",
+  "selectCountry": "Select country",
+  "selectCity": "Select city",
+  "selectArea": "Select area"
 }
