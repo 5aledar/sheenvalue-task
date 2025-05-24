@@ -10,7 +10,12 @@ export interface Resturant {
   name_ar: string;
   name_tr: string;
   email: string;
-  logo: string;
+  logo:
+    | {
+        path: string;
+        url: string;
+      }
+    | string;
   latitude: string;
   longitude: string;
   facebook_url: string;

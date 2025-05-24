@@ -24,6 +24,44 @@ export const columns: ColumnDef<Resturant>[] = [
     enableHiding: false
   },
   {
+    accessorKey: 'logo',
+    header: 'Logo',
+    cell: ({ row }) => {
+      const logo = row.getValue('logo') as
+        | { path: string; url: string }
+        | string;
+
+      // Handle both object and string logo formats
+      let logoUrl = '';
+      if (typeof logo === 'object' && logo?.url) {
+        logoUrl = logo.url;
+      } else if (typeof logo === 'string' && logo) {
+        logoUrl = logo;
+      }
+
+      return logoUrl ? (
+        <div className="flex w-24 items-center justify-center">
+          <img
+            src={logoUrl}
+            alt="Restaurant logo"
+            className="h-12 w-12 rounded-full object-cover"
+            onError={(e) => {
+              // Hide image if it fails to load
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        </div>
+      ) : (
+        <div className="flex items-center justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-gray-200 text-xs text-gray-500">
+            No Logo
+          </div>
+        </div>
+      );
+    },
+    enableSorting: false
+  },
+  {
     accessorKey: 'name_en',
     header: 'Name'
   },

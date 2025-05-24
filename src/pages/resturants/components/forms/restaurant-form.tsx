@@ -34,11 +34,6 @@ import {
 import { LocationPicker } from '../LocationPicker';
 import { useTranslation } from 'react-i18next';
 
-// Create a language context for the form
-// const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
-// Use i18next for translations
-const { t } = useTranslation();
-
 const restaurantFormSchema = z.object({
   country_id: z.string().min(1, { message: 'Country is required' }),
   city_id: z.string().min(1, { message: 'City is required' }),
@@ -78,6 +73,9 @@ interface RestaurantFormProps {
 }
 
 const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
+  // Use i18next for translations
+  const { t } = useTranslation();
+
   // Log the restaurant data for debugging
   console.log('Restaurant data received:', resturant);
   const form = useForm<RestaurantFormValues>({
@@ -97,7 +95,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
           name_tr: resturant.name_tr || '',
           email: resturant.email || '',
           phone: resturant.phone || '',
-          logo: resturant.logo || '',
+          logo:
+            typeof resturant.logo === 'object'
+              ? resturant.logo?.path || ''
+              : resturant.logo || '',
           latitude: resturant.latitude || '',
           longitude: resturant.longitude || '',
           facebook_url: resturant.facebook_url || '',
@@ -202,7 +203,12 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
           if (response && response.data) {
             // Set the form value to the path returned from the server
             if (response.data.path) {
-              form.setValue('logo', response.data.path);
+              form.setValue('logo', response.data.path, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true
+              });
+              console.log('Logo form value set to:', response.data.path);
             }
 
             // Use the complete URL from the server for the preview image
@@ -217,17 +223,25 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
             if (serverImageUrl) {
               setPreviewImages({ [type]: serverImageUrl });
               console.log('Image uploaded successfully:', serverImageUrl);
+              console.log(
+                'Current form values after logo upload:',
+                form.getValues()
+              );
+              toast.success('Logo uploaded successfully');
             } else {
               console.error('No valid image URL found in response');
               setPreviewImages({ [type]: '' });
+              toast.error('Failed to get image URL from server');
             }
           } else {
             console.error('Invalid response structure:', response);
             setPreviewImages({ [type]: '' });
+            toast.error('Invalid response from server');
           }
         } catch (err) {
           console.error('Error processing upload response:', err);
           setPreviewImages({ [type]: '' });
+          toast.error('Error processing upload response');
         }
       },
       onError: (error) => {
@@ -235,6 +249,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
         // Revoke the temporary object URL on error
         URL.revokeObjectURL(tempPreviewUrl);
         setPreviewImages({ [type]: '' });
+        toast.error('Failed to upload logo');
       }
     });
   };
@@ -253,17 +268,25 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
   const onSubmit = async (data: RestaurantFormValues) => {
     try {
       console.log('Form data being submitted:', data);
+      console.log('Logo value in form data:', data.logo);
+
+      // Validate that logo is present if required
+      if (!data.logo || data.logo.trim() === '') {
+        console.warn('No logo provided in form data');
+      }
 
       if (resturant) {
         console.log('Updating restaurant with ID:', resturant.id);
 
         // Create a clean copy of the data to avoid any reference issues
         const updateData = { ...data };
+        console.log('Update data being sent:', updateData);
 
         updateRestaurant(
           { id: resturant.id, data: updateData },
           {
-            onSuccess: () => {
+            onSuccess: (response) => {
+              console.log('Restaurant updated successfully:', response);
               toast.success('Restaurant updated successfully');
               modalClose();
             },
@@ -274,8 +297,10 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
           }
         );
       } else {
+        console.log('Creating new restaurant with data:', data);
         createRestaurant(data, {
-          onSuccess: () => {
+          onSuccess: (response) => {
+            console.log('Restaurant created successfully:', response);
             toast.success('New restaurant added successfully');
             modalClose();
           },
@@ -296,14 +321,22 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
     try {
       // Set logo preview
       if (resturant?.logo) {
-        const logoUrl = resturant.logo;
+        let logoUrl = '';
+
+        // Handle both object and string logo formats
+        if (typeof resturant.logo === 'object' && resturant.logo?.url) {
+          logoUrl = resturant.logo.url;
+        } else if (typeof resturant.logo === 'string') {
+          logoUrl = resturant.logo;
+        }
+
         console.log('Setting initial logo preview:', logoUrl);
 
         // Make sure we're setting a valid URL
-        if (typeof logoUrl === 'string' && logoUrl.trim() !== '') {
+        if (logoUrl && logoUrl.trim() !== '') {
           setPreviewImages({ RESTAURANT_LOGO: logoUrl });
         } else {
-          console.warn('Invalid logo URL in restaurant data:', logoUrl);
+          console.warn('Invalid logo URL in restaurant data:', resturant.logo);
         }
       }
 
@@ -599,7 +632,7 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
             <FormField
               control={form.control}
               name="logo"
-              render={({}) => (
+              render={({ field }) => (
                 <FormItem className="col-span-2">
                   <FormLabel>{t('logo')}</FormLabel>
                   {previewImages.RESTAURANT_LOGO ? (
@@ -631,6 +664,12 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
                         disabled={isUploading || isCreating || isUpdating}
                       />
                     </FormControl>
+                  )}
+                  {/* Debug: Show current logo value */}
+                  {field.value && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      <strong>Current logo path:</strong> {field.value}
+                    </div>
                   )}
                   <FormMessage />
                 </FormItem>
