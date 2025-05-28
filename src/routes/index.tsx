@@ -1,6 +1,7 @@
 import ChangePasswordPage from '@/pages/auth/change-password';
 import NotFound from '@/pages/not-found';
 import ResturantPage from '@/pages/resturants';
+import OrdersPage from '@/pages/orders';
 import { Suspense, lazy } from 'react';
 import { Navigate, Outlet, useRoutes } from 'react-router-dom';
 
@@ -55,6 +56,11 @@ export default function AppRouter() {
         {
           path: '/resturants',
           element: <ResturantPage />,
+          index: true
+        },
+        {
+          path: '/orders',
+          element: <OrdersPage />,
           index: true
         }
       ]

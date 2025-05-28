@@ -6,7 +6,8 @@
     "areas": "المناطق",
     "drivers": "السائقون",
     "roles": "الأدوار",
-    "resturant": "المطاعم"
+    "resturant": "المطاعم",
+    "orders": "الطلبات"
   },
   "auth": {
     "logout": "تسجيل الخروج"

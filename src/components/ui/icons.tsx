@@ -23,6 +23,7 @@ import {
   Pizza,
   Plus,
   Settings,
+  ShoppingCart,
   SunMedium,
   Trash,
   Twitter,
@@ -68,6 +69,7 @@ export const Icons = {
   // driver: CarFront,
   resturant: HamburgerMenuIcon,
   role: UserRoundCog,
+  shoppingCart: ShoppingCart,
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

@@ -12,6 +12,12 @@ export const navItems: NavItem[] = [
     href: '/resturants',
     icon: 'pizza',
     label: 'sidebar.resturant'
+  },
+  {
+    title: 'Orders',
+    href: '/orders',
+    icon: 'shoppingCart',
+    label: 'sidebar.orders'
   }
   // {
   //   title: 'Cities',

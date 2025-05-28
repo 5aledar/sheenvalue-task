@@ -6,7 +6,8 @@
     "areas": "Areas",
     "drivers": "Drivers",
     "roles": "Roles",
-    "resturant": "Resturants"
+    "resturant": "Resturants",
+    "orders": "Orders"
   },
   "auth": {
     "logout": "Logout"
