@@ -7,9 +7,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
+  FormDescription
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -18,7 +21,17 @@ import { useUpdateRestaurant } from '../../hooks/useUpdateRestaurant';
 import toast from 'react-hot-toast';
 import { Resturant } from '../../lib/types';
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import {
+  X,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Clock,
+  Image as ImageIcon,
+  Store,
+  Settings
+} from 'lucide-react';
 import { useUploadImage } from '@/hooks/useUploadImage';
 import { Switch } from '@/components/ui/switch';
 import { useFetchCountries } from '@/hooks/useFetchCountries';
@@ -99,8 +112,8 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
             typeof resturant.logo === 'object'
               ? resturant.logo?.path || ''
               : resturant.logo || '',
-          latitude: resturant.latitude || '',
-          longitude: resturant.longitude || '',
+          latitude: resturant.latitude ? resturant.latitude.toString() : '',
+          longitude: resturant.longitude ? resturant.longitude.toString() : '',
           facebook_url: resturant.facebook_url || '',
           instagram_url: resturant.instagram_url || '',
           contact_number: resturant.contact_number || '',
@@ -108,8 +121,12 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
             typeof resturant.is_available === 'boolean'
               ? resturant.is_available
               : true,
-          start_time: resturant.start_time || '08:00',
-          end_time: resturant.end_time || '23:00'
+          start_time: resturant.start_time
+            ? resturant.start_time.split(':').slice(0, 2).join(':')
+            : '08:00',
+          end_time: resturant.end_time
+            ? resturant.end_time.split(':').slice(0, 2).join(':')
+            : '23:00'
         }
       : {
           country_id: '',
@@ -275,15 +292,44 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
         console.warn('No logo provided in form data');
       }
 
+      // Helper function to format time to H:i format (remove seconds if present)
+      // Server expects "H:i" format (e.g., "14:30") but HTML time input can include seconds
+      const formatTimeToHi = (timeString: string): string => {
+        if (!timeString) return timeString;
+        // Remove seconds if present (e.g., "14:30:00" -> "14:30" or "04:39:00" -> "04:39")
+        return timeString.split(':').slice(0, 2).join(':');
+      };
+
+      // Format the data properly for the server
+      const formattedData = {
+        ...data,
+        // Ensure latitude and longitude are strings
+        latitude: data.latitude.toString(),
+        longitude: data.longitude.toString(),
+        // Ensure time format is correct (H:i format - 24 hour format like "14:30")
+        start_time: formatTimeToHi(data.start_time.trim()),
+        end_time: formatTimeToHi(data.end_time.trim()),
+        // Ensure IDs are strings
+        country_id: data.country_id.toString(),
+        city_id: data.city_id.toString(),
+        area_id: data.area_id.toString()
+      };
+
+      console.log('Formatted data being sent:', formattedData);
+      console.log('Time values:', {
+        original_start_time: data.start_time,
+        original_end_time: data.end_time,
+        formatted_start_time: formattedData.start_time,
+        formatted_end_time: formattedData.end_time,
+        start_time_type: typeof formattedData.start_time,
+        end_time_type: typeof formattedData.end_time
+      });
+
       if (resturant) {
         console.log('Updating restaurant with ID:', resturant.id);
 
-        // Create a clean copy of the data to avoid any reference issues
-        const updateData = { ...data };
-        console.log('Update data being sent:', updateData);
-
         updateRestaurant(
-          { id: resturant.id, data: updateData },
+          { id: resturant.id, data: formattedData },
           {
             onSuccess: (response) => {
               console.log('Restaurant updated successfully:', response);
@@ -292,13 +338,22 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
             },
             onError: (error: any) => {
               console.error('Update error details:', error);
-              toast.error(error?.message || 'Failed to update restaurant');
+
+              // Handle validation errors specifically
+              if (error?.response?.data?.errors) {
+                const errors = error.response.data.errors;
+                Object.keys(errors).forEach((key) => {
+                  toast.error(`${key}: ${errors[key]}`);
+                });
+              } else {
+                toast.error(error?.message || 'Failed to update restaurant');
+              }
             }
           }
         );
       } else {
-        console.log('Creating new restaurant with data:', data);
-        createRestaurant(data, {
+        console.log('Creating new restaurant with data:', formattedData);
+        createRestaurant(formattedData, {
           onSuccess: (response) => {
             console.log('Restaurant created successfully:', response);
             toast.success('New restaurant added successfully');
@@ -306,7 +361,16 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
           },
           onError: (error: any) => {
             console.error('Create error details:', error);
-            toast.error(error?.message || 'Failed to create restaurant');
+
+            // Handle validation errors specifically
+            if (error?.response?.data?.errors) {
+              const errors = error.response.data.errors;
+              Object.keys(errors).forEach((key) => {
+                toast.error(`${key}: ${errors[key]}`);
+              });
+            } else {
+              toast.error(error?.message || 'Failed to create restaurant');
+            }
           }
         });
       }
@@ -354,332 +418,536 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
   }, [resturant]);
 
   return (
-    <div className="p-5">
-      <Heading
-        title={resturant ? 'Update Restaurant' : 'Create New Restaurant'}
-        description=""
-        className="space-y-2 py-4 text-center"
-      />
+    <div className="  max-h-[120vh] p-6">
+      <div className="space-y-2 text-center">
+        <Heading
+          title={resturant ? 'Update Restaurant' : 'Create New Restaurant'}
+          description="Fill in the information below to manage your restaurant"
+          className="space-y-2"
+        />
+      </div>
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4"
+          className="space-y-6"
           autoComplete="off"
         >
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Country, City, Area */}
-            <FormField
-              control={form.control}
-              name="country_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('country')}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={isCreating || isUpdating}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectCountry')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {countries?.map((country: any) => (
-                        <SelectItem
-                          key={country.id}
-                          value={country.id.toString()}
-                        >
-                          {country.name_en}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* Basic Information Section */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Store className="h-5 w-5 text-primary" />
+                Basic Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="name_en"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('name')} (English)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Restaurant name in English"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="city_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('city')}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={
-                      isCreating || isUpdating || !form.watch('country_id')
-                    }
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectCity')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {cities?.map((city: any) => (
-                        <SelectItem key={city.id} value={city.id.toString()}>
-                          {city.name_en}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="name_ar"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('name')} (Arabic)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="اسم المطعم بالعربية"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="area_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('area')}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={
-                      isCreating || isUpdating || !form.watch('city_id')
-                    }
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectArea')} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {areas?.map((area: any) => (
-                        <SelectItem key={area.id} value={area.id.toString()}>
-                          {area.name_en}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="name_tr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('name')} (Turkish)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Restoran adı Türkçe"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Address Fields */}
-            <FormField
-              control={form.control}
-              name="address_en"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('address')} (English)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="العنوان بالإنجليزية"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address_ar"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('address')} (Arabic)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="العنوان بالعربية"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address_tr"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('address')} (Turkish)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="العنوان بالتركية"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Name Fields */}
-            <FormField
-              control={form.control}
-              name="name_en"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('name')} (English)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="الاسم بالإنجليزية"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="name_ar"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('name')} (Arabic)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="الاسم بالعربية"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="name_tr"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('name')} (Turkish)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="الاسم بالتركية"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Contact Info */}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('email')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="البريد الإلكتروني"
-                      type="email"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('phone')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="الهاتف"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="contact_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('contactNumber')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="رقم الاتصال"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Logo Upload */}
-            <FormField
-              control={form.control}
-              name="logo"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel>{t('logo')}</FormLabel>
-                  {previewImages.RESTAURANT_LOGO ? (
-                    <div className="relative">
-                      <img
-                        src={previewImages.RESTAURANT_LOGO}
-                        alt="Logo preview"
-                        className="h-40 w-40 rounded-md object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage('RESTAURANT_LOGO')}
-                        className="absolute right-2 top-2 rounded-full bg-white p-1 shadow-sm hover:bg-gray-100"
+          {/* Location Information Section */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <MapPin className="h-5 w-5 text-primary" />
+                Location Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="country_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('country')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isCreating || isUpdating}
                       >
-                        <X className="h-4 w-4 text-gray-600" />
-                      </button>
-                    </div>
-                  ) : (
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleImageChange('RESTAURANT_LOGO', file);
-                          }
-                        }}
-                        disabled={isUploading || isCreating || isUpdating}
-                      />
-                    </FormControl>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('selectCountry')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {countries?.map((country: any) => (
+                            <SelectItem
+                              key={country.id}
+                              value={country.id.toString()}
+                            >
+                              {country.name_en}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                  {/* Debug: Show current logo value */}
-                  {field.value && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      <strong>Current logo path:</strong> {field.value}
-                    </div>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                />
 
-            {/* Map Location Picker */}
-            <div className="col-span-2">
+                <FormField
+                  control={form.control}
+                  name="city_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('city')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={
+                          isCreating || isUpdating || !form.watch('country_id')
+                        }
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('selectCity')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {cities?.map((city: any) => (
+                            <SelectItem
+                              key={city.id}
+                              value={city.id.toString()}
+                            >
+                              {city.name_en}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="area_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('area')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={
+                          isCreating || isUpdating || !form.watch('city_id')
+                        }
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('selectArea')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {areas?.map((area: any) => (
+                            <SelectItem
+                              key={area.id}
+                              value={area.id.toString()}
+                            >
+                              {area.name_en}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="address_en"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('address')} (English)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Street address in English"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="address_ar"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('address')} (Arabic)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="العنوان بالعربية"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="address_tr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('address')} (Turkish)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Türkçe adres"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information Section */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Phone className="h-5 w-5 text-primary" />
+                Contact Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        {t('email')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="restaurant@example.com"
+                          type="email"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        {t('phone')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="+1 (555) 123-4567"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="contact_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        {t('contactNumber')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="+1 (555) 987-6543"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Social Media Section */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Globe className="h-5 w-5 text-primary" />
+                Social Media
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="facebook_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        {t('facebookUrl')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://facebook.com/restaurant"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="instagram_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        {t('instagramUrl')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://instagram.com/restaurant"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Restaurant Settings Section */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Settings className="h-5 w-5 text-primary" />
+                Restaurant Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Logo Upload */}
+              <FormField
+                control={form.control}
+                name="logo"
+                render={({ field: _field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      {t('logo')}
+                    </FormLabel>
+                    <FormDescription>
+                      Upload your restaurant logo (recommended size: 400x400px)
+                    </FormDescription>
+                    {previewImages.RESTAURANT_LOGO ? (
+                      <div className="relative inline-block">
+                        <img
+                          src={previewImages.RESTAURANT_LOGO}
+                          alt="Logo preview"
+                          className="h-32 w-32 rounded-lg border-2 border-border object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage('RESTAURANT_LOGO')}
+                          className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleImageChange('RESTAURANT_LOGO', file);
+                            }
+                          }}
+                          disabled={isUploading || isCreating || isUpdating}
+                          className="cursor-pointer"
+                        />
+                      </FormControl>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Separator />
+
+              {/* Availability and Hours */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="is_available"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          {t('available')}
+                        </FormLabel>
+                        <FormDescription>
+                          Restaurant is currently accepting orders
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="start_time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        {t('openingTime')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="time"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="end_time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        {t('closingTime')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="time"
+                          {...field}
+                          disabled={isCreating || isUpdating}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Map Location Section */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <MapPin className="h-5 w-5 text-primary" />
+                Location on Map
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <FormItem>
                 <FormLabel>{t('locationMap')}</FormLabel>
+                <FormDescription>
+                  Click on the map to set the exact location of your restaurant
+                </FormDescription>
                 <FormControl>
                   <div className="w-full">
                     {!isCreating && !isUpdating ? (
@@ -687,19 +955,26 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
                         initialLat={form.watch('latitude') || '33.5138'}
                         initialLng={form.watch('longitude') || '36.2765'}
                         onLocationSelect={(lat, lng) => {
-                          form.setValue('latitude', lat.toString(), {
+                          // Ensure coordinates are stored as strings with proper precision
+                          const latString = lat.toFixed(6);
+                          const lngString = lng.toFixed(6);
+
+                          form.setValue('latitude', latString, {
                             shouldValidate: true,
                             shouldDirty: true
                           });
-                          form.setValue('longitude', lng.toString(), {
+                          form.setValue('longitude', lngString, {
                             shouldValidate: true,
                             shouldDirty: true
                           });
-                          console.log('Location updated:', { lat, lng });
+                          console.log('Location updated:', {
+                            lat: latString,
+                            lng: lngString
+                          });
                         }}
                       />
                     ) : (
-                      <div className="flex h-80 w-full items-center justify-center rounded-md bg-gray-100">
+                      <div className="flex h-80 w-full items-center justify-center rounded-md bg-muted">
                         <p className="text-muted-foreground">
                           Map loading is disabled while form is submitting...
                         </p>
@@ -734,125 +1009,43 @@ const RestaurantForm = ({ modalClose, resturant }: RestaurantFormProps) => {
                   )}
                 />
               </div>
-            </div>
-            {/* Social Media */}
-            <FormField
-              control={form.control}
-              name="facebook_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('facebookUrl')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="رابط فيسبوك"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            </CardContent>
+          </Card>
 
-            <FormField
-              control={form.control}
-              name="instagram_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('instagramUrl')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="رابط انستغرام"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Availability */}
-            <FormField
-              control={form.control}
-              name="is_available"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      {t('available')}
-                    </FormLabel>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* Working Hours */}
-            <FormField
-              control={form.control}
-              name="start_time"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('openingTime')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="time"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="end_time"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('closingTime')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="time"
-                      {...field}
-                      disabled={isCreating || isUpdating}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className="flex items-center justify-center gap-4 pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              className="rounded-full"
-              size="lg"
-              onClick={modalClose}
-              disabled={isCreating || isUpdating}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="rounded-full"
-              size="lg"
-              disabled={isCreating || isUpdating}
-            >
-              {resturant ? 'Update Restaurant' : 'Create Restaurant'}
-            </Button>
-          </div>
+          {/* Action Buttons */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={modalClose}
+                  disabled={isCreating || isUpdating}
+                  className="min-w-32"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isCreating || isUpdating}
+                  className="min-w-32"
+                >
+                  {isCreating || isUpdating ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                      {resturant ? 'Updating...' : 'Creating...'}
+                    </>
+                  ) : resturant ? (
+                    'Update Restaurant'
+                  ) : (
+                    'Create Restaurant'
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </form>
       </Form>
     </div>
