@@ -28,18 +28,6 @@ export const columns: ColumnDef<Order>[] = [
     header: 'Order ID'
   },
   {
-    accessorKey: 'restaurant_id',
-    header: 'Restaurant',
-    cell: ({ row }) => {
-      const restaurantId = row.getValue('restaurant_id') as string;
-      return `Restaurant #${restaurantId}`;
-    }
-  },
-  {
-    accessorKey: 'customer_phone',
-    header: 'Customer Phone'
-  },
-  {
     accessorKey: 'price',
     header: 'Price',
     cell: ({ row }) => {

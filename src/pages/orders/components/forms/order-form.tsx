@@ -10,16 +10,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useCreateOrder } from '../../hooks/useCreateOrder';
 import { useUpdateOrder } from '../../hooks/useUpdateOrder';
+import { useFetchRestaurantsForSelect } from '../../hooks/useFetchRestaurantsForSelect';
 import toast from 'react-hot-toast';
 import { Order } from '../../lib/types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LocationPicker } from '../../../resturants/components/LocationPicker';
 import { MapPin, Phone, DollarSign, FileText } from 'lucide-react';
 
@@ -65,10 +65,13 @@ export default function OrderForm({
   const createOrder = useCreateOrder(restaurantId);
   const updateOrder = useUpdateOrder(restaurantId);
 
-  const [pickupCoords, setPickupCoords] = useState({
-    lat: initialData?.pickup_latitude ?? 33.5138,
-    lng: initialData?.pickup_longitude ?? 36.2765
-  });
+  // Fetch restaurants to get the selected restaurant's location
+  const { restaurants } = useFetchRestaurantsForSelect();
+
+  // Find the selected restaurant
+  const selectedRestaurant = restaurants?.find(
+    (r: any) => r.id.toString() === restaurantId
+  );
 
   const [deliveryCoords, setDeliveryCoords] = useState({
     lat: initialData?.delivery_latitude ?? 33.5138,
@@ -79,8 +82,16 @@ export default function OrderForm({
     resolver: zodResolver(orderFormSchema),
     defaultValues: initialData
       ? {
-          pickup_latitude: initialData.pickup_latitude ?? 33.5138,
-          pickup_longitude: initialData.pickup_longitude ?? 36.2765,
+          pickup_latitude:
+            initialData.pickup_latitude ??
+            (selectedRestaurant
+              ? parseFloat(selectedRestaurant.latitude)
+              : 33.5138),
+          pickup_longitude:
+            initialData.pickup_longitude ??
+            (selectedRestaurant
+              ? parseFloat(selectedRestaurant.longitude)
+              : 36.2765),
           delivery_latitude: initialData.delivery_latitude ?? 33.5138,
           delivery_longitude: initialData.delivery_longitude ?? 36.2765,
           price: initialData.price ?? 0,
@@ -88,8 +99,12 @@ export default function OrderForm({
           customer_phone: initialData.customer_phone ?? ''
         }
       : {
-          pickup_latitude: 33.5138,
-          pickup_longitude: 36.2765,
+          pickup_latitude: selectedRestaurant
+            ? parseFloat(selectedRestaurant.latitude)
+            : 33.5138,
+          pickup_longitude: selectedRestaurant
+            ? parseFloat(selectedRestaurant.longitude)
+            : 36.2765,
           delivery_latitude: 33.5138,
           delivery_longitude: 36.2765,
           price: 0,
@@ -98,30 +113,41 @@ export default function OrderForm({
         }
   });
 
+  // Update pickup coordinates when restaurant changes
+  useEffect(() => {
+    if (selectedRestaurant && !initialData) {
+      const restaurantLat = parseFloat(selectedRestaurant.latitude);
+      const restaurantLng = parseFloat(selectedRestaurant.longitude);
+
+      form.setValue('pickup_latitude', restaurantLat);
+      form.setValue('pickup_longitude', restaurantLng);
+    }
+  }, [selectedRestaurant, form, initialData]);
+
   const isLoading = createOrder.isPending || updateOrder.isPending;
 
   const onSubmit = async (data: OrderFormValues) => {
     try {
+      // Ensure notes is always a string
+      const submitData = {
+        ...data,
+        notes: data.notes || ''
+      };
+
       if (initialData) {
         await updateOrder.mutateAsync({
           orderId: initialData.id.toString(),
-          data
+          data: submitData
         });
         toast.success('Order updated successfully');
       } else {
-        await createOrder.mutateAsync(data);
+        await createOrder.mutateAsync(submitData);
         toast.success('Order created successfully');
       }
       onSuccess?.();
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Something went wrong');
     }
-  };
-
-  const handlePickupLocationSelect = (lat: number, lng: number) => {
-    setPickupCoords({ lat, lng });
-    form.setValue('pickup_latitude', lat);
-    form.setValue('pickup_longitude', lng);
   };
 
   const handleDeliveryLocationSelect = (lat: number, lng: number) => {
@@ -225,159 +251,22 @@ export default function OrderForm({
             </CardContent>
           </Card>
 
-          {/* Location Information with Tabs */}
+          {/* Delivery Location */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MapPin className="h-4 w-4" />
-                Location Information
+                Delivery Location
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="pickup" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="pickup">Pickup Location</TabsTrigger>
-                  <TabsTrigger value="delivery">Delivery Location</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="pickup" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="pickup_latitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm">Latitude</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="any"
-                              disabled={isLoading}
-                              placeholder="Latitude"
-                              {...field}
-                              value={pickupCoords.lat}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                setPickupCoords((prev) => ({
-                                  ...prev,
-                                  lat: value
-                                }));
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="pickup_longitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm">Longitude</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="any"
-                              disabled={isLoading}
-                              placeholder="Longitude"
-                              {...field}
-                              value={pickupCoords.lng}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                setPickupCoords((prev) => ({
-                                  ...prev,
-                                  lng: value
-                                }));
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="h-64">
-                    <LocationPicker
-                      onLocationSelect={handlePickupLocationSelect}
-                      initialLat={pickupCoords.lat.toString()}
-                      initialLng={pickupCoords.lng.toString()}
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="delivery" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={form.control}
-                      name="delivery_latitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm">Latitude</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="any"
-                              disabled={isLoading}
-                              placeholder="Latitude"
-                              {...field}
-                              value={deliveryCoords.lat}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                setDeliveryCoords((prev) => ({
-                                  ...prev,
-                                  lat: value
-                                }));
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="delivery_longitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm">Longitude</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="any"
-                              disabled={isLoading}
-                              placeholder="Longitude"
-                              {...field}
-                              value={deliveryCoords.lng}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                setDeliveryCoords((prev) => ({
-                                  ...prev,
-                                  lng: value
-                                }));
-                                field.onChange(value);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="h-64">
-                    <LocationPicker
-                      onLocationSelect={handleDeliveryLocationSelect}
-                      initialLat={deliveryCoords.lat.toString()}
-                      initialLng={deliveryCoords.lng.toString()}
-                    />
-                  </div>
-                </TabsContent>
-              </Tabs>
+            <CardContent className="space-y-4">
+              <div className="h-84">
+                <LocationPicker
+                  onLocationSelect={handleDeliveryLocationSelect}
+                  initialLat={deliveryCoords.lat.toString()}
+                  initialLng={deliveryCoords.lng.toString()}
+                />
+              </div>
             </CardContent>
           </Card>
 
