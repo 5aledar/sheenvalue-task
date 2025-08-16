@@ -1,8 +1,3 @@
-Got it 👍 — I’ll rewrite the whole thing **fully in Markdown format** so you can just drop it into your `README.md` and it will look professional.
-
-Here’s the cleaned-up version:
-
-````markdown
 # React Admin Dashboard – Candidate Test Submission
 
 This is my submission for the **Front-End Candidate Test** for **SheenValue L.L.C.**  
@@ -55,9 +50,10 @@ The app demonstrates authentication, product CRUD operations, and a product deta
 
 1. Clone the repo:
    ```bash
-   git clone <your-repo-url>
-   cd <project-folder>
+   git clone https://github.com/5aledar/sheenvalue-task.git
+   cd sheenvalue-task
    ```
+
 ````
 
 2. Install dependencies:
@@ -97,3 +93,4 @@ The app demonstrates authentication, product CRUD operations, and a product deta
 Developed and submitted by:
 **Khaled abd alslam**
 📧 \[[khaledabdalslam99@gmail.com](mailto:your.email@example.com)]
+````
