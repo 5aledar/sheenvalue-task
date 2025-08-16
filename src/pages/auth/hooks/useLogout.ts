@@ -1,48 +1,24 @@
 import { useMutation } from '@tanstack/react-query';
-import { client, setHeaderToken, refreshAuth } from '../../../lib/axiosClient';
-import { redirect } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export const logout = async (data: any) => {
-  const token = localStorage.getItem('res_token');
+  const token = localStorage.getItem('token');
 
   try {
-    const response = await client.post(
-      '/restaurant/auth/logout',
+    const response = await axios.post(
+      'https://reqres.in/api/logout',
       {},
       {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          'x-api-key': 'reqres-free-v1'
         }
       }
     );
     return response.data;
   } catch (error: any) {
-    console.log('error', error);
-
-    if (error.response?.status === 401) {
-      const newToken = await refreshAuth();
-      console.log('new token', newToken);
-
-      if (newToken) {
-        setHeaderToken(newToken);
-        const retryResponse = await client.post(
-          '/restaurant/auth/logout',
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${newToken}`
-            }
-          }
-        );
-        return retryResponse.data;
-      } else {
-        localStorage.removeItem('res_token');
-        // toast.error('something went wrong');
-        redirect('/login');
-      }
-    } else {
-      throw error;
-    }
+    toast.error('error', error);
   }
 };
 export function useLogout() {

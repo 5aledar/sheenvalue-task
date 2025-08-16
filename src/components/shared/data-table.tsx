@@ -62,7 +62,7 @@ export default function DataTable<TData, TValue>({
     });
 
     if (onPageChange) {
-      onPageChange(pageIndex + 1); // Sync with `CountriesTable`
+      onPageChange(pageIndex + 1);
     }
   }, [pageIndex, pageSize, searchParams, setSearchParams, onPageChange]);
   const table = useReactTable({

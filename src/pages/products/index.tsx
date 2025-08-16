@@ -1,0 +1,21 @@
+import PageHead from '@/components/shared/page-head';
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import ProductsTable from './components';
+
+export default function ProductsPage() {
+  return (
+    <>
+      <div className="p-4 md:p-8">
+        <PageHead title="Prodcts Management | App" />
+        <Breadcrumbs
+          items={[
+            { title: 'Dashboard', link: '/' },
+            { title: 'Products', link: '/products' }
+          ]}
+        />
+
+        <ProductsTable />
+      </div>
+    </>
+  );
+}

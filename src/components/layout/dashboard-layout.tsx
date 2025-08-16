@@ -12,13 +12,13 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-secondary">
+    <div className="flex h-screen overflow-hidden bg-white">
       <MobileSidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
       <Sidebar />
-      <div className="mt-5 flex w-0 flex-1 flex-col overflow-hidden">
+      <div className="mt-5  flex w-0 flex-1 flex-col overflow-hidden">
         <div className="relative z-10  flex h-10 flex-shrink-0 ">
           <button
             className="pl-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden xl:hidden"

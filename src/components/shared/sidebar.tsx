@@ -22,7 +22,7 @@ export default function Sidebar({ className }: SidebarProps) {
   return (
     <nav
       className={cn(
-        `relative z-10 hidden h-screen flex-none  px-3 md:block`,
+        `relative z-10 hidden h-screen flex-none bg-black px-3  text-white md:block`,
         status && 'duration-500',
         !isMinimized ? 'w-72' : 'w-[80px]',
         className
@@ -43,7 +43,7 @@ export default function Sidebar({ className }: SidebarProps) {
           onClick={handleToggle}
         />
       </div>
-      <div className=" py-4">
+      <div className=" py-4 ">
         <div className="flex h-[90vh] flex-col justify-between px-2 pb-5 pt-2">
           <div className="mt-3 space-y-1 ">
             <DashboardNav items={navItems} />

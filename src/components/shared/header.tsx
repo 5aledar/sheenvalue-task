@@ -2,8 +2,6 @@ import { navItems } from '@/constants/data';
 import { usePathname } from '@/routes/hooks';
 import Heading from './heading';
 import UserNav from './user-nav';
-import { ModeToggle } from './theme-toggle';
-import LanguageSwitcher from './LanguageSwitcher';
 
 // Custom hook to find the matched path
 const useMatchedPath = (pathname: string) => {
@@ -20,12 +18,10 @@ export default function Header() {
   const headingText = useMatchedPath(pathname);
 
   return (
-    <div className="flex w-full flex-1 items-center justify-between bg-secondary px-4">
+    <div className="flex w-full flex-1 items-center justify-between bg-white  px-4">
       <Heading title={headingText} />
       <div className=" flex  items-center gap-2 md:ml-6">
         <UserNav />
-        <LanguageSwitcher />
-        <ModeToggle />
       </div>
     </div>
   );

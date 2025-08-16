@@ -3,10 +3,16 @@ import axios from 'axios';
 
 const login = async (data: any) => {
   const response = await axios.post(
-    'https://dispatcher.mouhannadabdalrhem.online/api/v1/restaurant/auth/login',
-    data
+    'https://reqres.in/api/login',
+
+    data,
+    {
+      headers: {
+        // i should use it as an enviroment variable put i used it directly in the code just for the task
+        'x-api-key': 'reqres-free-v1'
+      }
+    }
   );
-  console.log(response.data);
 
   return response.data;
 };
@@ -14,11 +20,7 @@ const login = async (data: any) => {
 export function useLogin() {
   const mutation = useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
-      console.log(data);
 
-      localStorage.setItem('res_token', data.data.token);
-    },
     onError: (error) => {
       console.error('Login failed:', error);
     }

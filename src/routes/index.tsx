@@ -1,7 +1,6 @@
-import ChangePasswordPage from '@/pages/auth/change-password';
 import NotFound from '@/pages/not-found';
-import ResturantPage from '@/pages/resturants';
-import OrdersPage from '@/pages/orders';
+import ProductsPage from '@/pages/products';
+import ProductDetails from '@/pages/products/ProductDetails';
 import { Suspense, lazy } from 'react';
 import { Navigate, Outlet, useRoutes } from 'react-router-dom';
 
@@ -28,40 +27,14 @@ export default function AppRouter() {
           element: <DashboardPage />,
           index: true
         },
-        // {
-        //   path: 'countries',
-        //   element: <CountryPage />
-        // },
-        // {
-        //   path: 'cities',
-        //   element: <CityPage />
-        // },
-        // {
-        //   path: 'areas',
-        //   element: <AreaPage />
-        // },
-        // {
-        //   path: 'drivers',
-        //   element: <DriverPage />
-        // },
-        // {
-        //   path: 'roles',
-        //   element: <RolesPage />
-        // },
         {
-          path: '/change-password',
-          element: <ChangePasswordPage />,
+          path: '/products',
+          element: <ProductsPage />,
           index: true
         },
         {
-          path: '/resturants',
-          element: <ResturantPage />,
-          index: true
-        },
-        {
-          path: '/orders',
-          element: <OrdersPage />,
-          index: true
+          path: '/products/:id',
+          element: <ProductDetails />
         }
       ]
     }

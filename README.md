@@ -1,48 +1,99 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/9113740/201498864-2a900c64-d88f-4ed4-b5cf-770bcb57e1f5.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/9113740/201498152-b171abb8-9225-487a-821c-6ff49ee48579.png">
-</picture>
+Got it 👍 — I’ll rewrite the whole thing **fully in Markdown format** so you can just drop it into your `README.md` and it will look professional.
 
-<div align="center"><strong>React Admin Dashboard Starter Template With Shadcn-ui</strong></div>
-<div align="center">Built with the Vite + React Ts</div>
-<br />
-<div align="center">
-<a href="https://react-shadcn-dashboard-starter.vercel.app/">View Demo</a>
-<span>
-</div>
+Here’s the cleaned-up version:
 
-## Overview
+````markdown
+# React Admin Dashboard – Candidate Test Submission
 
-This is a starter template using the following stack:
+This is my submission for the **Front-End Candidate Test** for **SheenValue L.L.C.**  
+It is a small **Admin Dashboard** built with **React, TypeScript, Tailwind CSS, React Query, and Zustand**.
 
-- Js Library - [React 18](https://react.dev/)
-- Language - [TypeScript](https://www.typescriptlang.org)
-- Styling - [Tailwind CSS](https://tailwindcss.com)
-- Components - [Shadcn-ui](https://ui.shadcn.com)
-- Schema Validations - [Zod](https://zod.dev)
-- Async state management - [Tanstack Query aka React Query](https://tanstack.com/query/latest/docs/framework/react/overview)
-- Tables - [Tanstack Tables](https://ui.shadcn.com/docs/components/data-table)
-- Forms - [React Hook Form](https://ui.shadcn.com/docs/components/form)
-- Linting - [ESLint](https://eslint.org)
-- Formatting - [Prettier](https://prettier.io)
-- Pre-commit hook - [Husky](https://typicode.github.io/husky/)
+The app demonstrates authentication, product CRUD operations, and a product details page using **public APIs**.
 
-## Pages
+---
 
-| Pages                                                                  | Specifications                                                                   |
-| :--------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
-| [Signup](https://react-shadcn-dashboard-starter.vercel.app/login)      | Custom auth.                                                                     |
-| [Dashboard](https://react-shadcn-dashboard-starter.vercel.app/)        | Cards with recharts graphs for analytics with dark mode ✅.                      |
-| [Students](https://react-shadcn-dashboard-starter.vercel.app/students) | Tanstack tables with students details with server side searching, pagination etc |
-| [404](https://react-shadcn-dashboard-starter.vercel.app/404)           | Not Found Page                                                                   |
-| -                                                                      | -                                                                                |
+## 📖 Features
 
-## Getting Started
+### 🔐 Authentication
 
-Follow these steps to clone the repository and start the development server:
+- Login page connected to [`reqres.in`](https://reqres.in/api/login)
+- Stores token in `localStorage` after successful login
+- Logout clears token and redirects to login
+- Global auth state managed via **Zustand**
 
-- `git clone https://github.com/Kiranism/react-shadcn-dashboard-starter.git`
-- `npm install`
-- `npm run dev`
+### 📦 Product Management
 
-You should now be able to access the application at http://localhost:5173.
+- Product list fetched from [`dummyjson.com`](https://dummyjson.com/products)
+- Displayed in a **paginated table** with **search by title**
+- CRUD support:
+  - **Add Product** → modal with form validation (React Hook Form + Zod)
+  - **Edit Product** → modal pre-filled with product data
+  - **Delete Product** → confirmation modal before removal
+  - **View Product** → details page with images, description, and mock reviews
+
+### 🎨 UI/UX
+
+- Responsive and mobile-friendly
+- Loading states, error handling, and success/error toasts
+- Clean layout using **Tailwind CSS + Shadcn/ui components**
+
+---
+
+## ⚡ Tech Stack
+
+- **React 18 + TypeScript** – base framework
+- **Tailwind CSS** – utility-first styling
+- **Shadcn/ui** – prebuilt UI components
+- **React Query (TanStack Query)** – data fetching + caching
+- **React Hook Form + Zod** – forms and validation
+- **Zustand** – lightweight global state for authentication
+- **Vite** – fast dev build tool
+
+---
+
+## 🚀 Getting Started
+
+1. Clone the repo:
+   ```bash
+   git clone <your-repo-url>
+   cd <project-folder>
+   ```
+````
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Run the app locally:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open the app at:
+
+   ```
+   http://localhost:5173
+   ```
+
+---
+
+## ✨ Notes
+
+- APIs used:
+
+  - **Auth**: `POST https://reqres.in/api/login`
+  - **Products**: `https://dummyjson.com/products`
+
+- Authentication is **mocked** (no real backend)
+- Products API supports **pagination** via `skip` + `limit`
+
+---
+
+## 📩 Candidate Info
+
+Developed and submitted by:
+**Khaled abd alslam**
+📧 \[[khaledabdalslam99@gmail.com](mailto:your.email@example.com)]

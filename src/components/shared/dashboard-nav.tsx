@@ -1,4 +1,3 @@
-'use client';
 import { Icons } from '@/components/ui/icons';
 import { cn } from '@/lib/utils';
 import { NavItem } from '@/types';
@@ -12,7 +11,6 @@ import {
 } from '@/components/ui/tooltip';
 import { usePathname } from '@/routes/hooks';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -28,16 +26,18 @@ export default function DashboardNav({
   const path = usePathname();
   const { isMinimized } = useSidebar();
 
-  if (!items?.length) {
-    return null;
-  }
-  const { t } = useTranslation();
+  if (!items?.length) return null;
 
   return (
     <nav className="grid items-start gap-2">
       <TooltipProvider>
         {items.map((item, index) => {
           const Icon = Icons[item.icon || 'arrowRight'];
+
+          // Determine if the item should be active
+          const isActive =
+            item.href === '/' ? path === '/' : path.startsWith(item.href);
+
           return (
             item.href && (
               <Tooltip key={index}>
@@ -46,33 +46,27 @@ export default function DashboardNav({
                     to={item.disabled ? '/' : item.href}
                     className={cn(
                       'flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:text-muted-foreground',
-                      path === item.href
-                        ? 'bg-white text-black hover:text-black'
+                      isActive
+                        ? 'bg-gradient-to-r from-[#F35827] to-[#F9972F] text-white transition-all duration-500 hover:from-[#F9972F] hover:to-[#F35827]'
                         : 'transparent',
                       item.disabled && 'cursor-not-allowed opacity-80'
                     )}
-                    onClick={() => {
-                      if (setOpen) setOpen(false);
-                    }}
+                    onClick={() => setOpen?.(false)}
                   >
-                    <Icon className={`ml-2.5 size-5`} />
-
+                    <Icon className="ml-2.5 size-5" />
                     {isMobileNav || (!isMinimized && !isMobileNav) ? (
-                      <span className="mr-2 truncate">
-                        {t(String(item.label))}
-                      </span>
-                    ) : (
-                      ''
-                    )}
+                      <span className="mr-2 truncate">{item.label}</span>
+                    ) : null}
                   </Link>
                 </TooltipTrigger>
+
                 <TooltipContent
                   align="center"
                   side="right"
                   sideOffset={8}
                   className={!isMinimized ? 'hidden' : 'inline-block'}
                 >
-                  item.title
+                  {item.label}
                 </TooltipContent>
               </Tooltip>
             )

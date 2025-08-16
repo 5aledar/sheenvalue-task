@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useLogout } from '../../hooks/useLogout';
 import { useRouter } from '@/routes/hooks';
 import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '../../store/authStore';
 
 interface LogoutProps {
   isMinimized?: boolean;
@@ -11,11 +11,11 @@ interface LogoutProps {
 const LogoutButton = ({ isMinimized }: LogoutProps) => {
   const router = useRouter();
   const { mutate: logout, isPending } = useLogout();
-  const { t } = useTranslation();
+  const { logoutHandler } = useAuthStore();
   const handleLogout = () => {
     logout(undefined, {
       onSuccess: () => {
-        localStorage.removeItem('res_token');
+        logoutHandler();
         toast.success('Logged out successfully');
         router.push('/login');
       },
@@ -30,9 +30,10 @@ const LogoutButton = ({ isMinimized }: LogoutProps) => {
       onClick={handleLogout}
       className="flex w-full justify-start gap-1 p-3 "
       disabled={isPending}
+      variant={'secondary'}
     >
       <LogOutIcon className="w-4" />
-      {!isMinimized && t('auth.logout')}
+      {!isMinimized && 'Logout'}
     </Button>
   );
 };

@@ -6,7 +6,6 @@ import { Suspense } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
-import ThemeProvider from './theme-provider';
 import { SidebarProvider } from '@/hooks/use-sidebar';
 
 export const queryClient = new QueryClient();
@@ -43,9 +42,7 @@ export default function AppProvider({
           <ErrorBoundary FallbackComponent={ErrorFallback}>
             <QueryClientProvider client={queryClient}>
               <ReactQueryDevtools />
-              <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-                <SidebarProvider>{children}</SidebarProvider>
-              </ThemeProvider>
+              <SidebarProvider>{children}</SidebarProvider>
             </QueryClientProvider>
           </ErrorBoundary>
         </BrowserRouter>
